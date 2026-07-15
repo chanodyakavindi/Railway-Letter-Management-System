@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
+const fs = require('fs');
 const cron = require('node-cron');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/errorHandler');
@@ -39,9 +40,16 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve the original wireframe UI (now wired to this API via api-bridge.js)
-const wireframeDir = path.join(__dirname, '..', 'legacy-wireframe');
-app.use(express.static(wireframeDir));
+// Serve the single frontend build from /client/dist (SPA fallback)
+const clientBuildDir = path.join(__dirname, '..', 'client', 'dist');
+if (fs.existsSync(clientBuildDir)) {
+  app.use(express.static(clientBuildDir));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientBuildDir, 'index.html'));
+  });
+} else {
+  console.warn('Client build directory not found at', clientBuildDir, '. Static frontend will not be served.');
+}
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'RLMS API' });

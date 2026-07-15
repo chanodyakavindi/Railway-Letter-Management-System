@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const NAV_ITEMS = [
@@ -17,6 +18,14 @@ const NAV_ITEMS = [
 ];
 
 export default function Sidebar({ reminderCount, onLogout }) {
+  const [dark, setDark] = useState(() => !!document.body.classList.contains('dark-theme'));
+  useEffect(() => {
+    if (dark) document.body.classList.add('dark-theme');
+    else document.body.classList.remove('dark-theme');
+  }, [dark]);
+
+  const toggleTheme = () => setDark((d) => !d);
+
   const { user, hasRole } = useAuth();
   const initial = user?.fullName?.charAt(0) || 'U';
 
@@ -61,6 +70,10 @@ export default function Sidebar({ reminderCount, onLogout }) {
       </nav>
 
       <div className="sidebar-footer">
+        <button type="button" className="theme-toggle-btn" onClick={toggleTheme}>
+          <span className="theme-icon">{dark ? '🌙' : '☀️'}</span>
+          <span>{dark ? 'Dark Mode' : 'Light Mode'}</span>
+        </button>
         <button type="button" className="btn-logout" onClick={onLogout}>
           <span className="logout-icon">↩</span>
           <span>Sign Out / පිටවීම</span>

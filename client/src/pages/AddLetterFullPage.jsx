@@ -5,8 +5,15 @@ import MultiSelect from '../components/MultiSelect';
 import Loading from '../components/Loading';
 import { lettersApi } from '../api';
 import { useToast } from '../context/ToastContext';
-import { buildLetterFormData, defaultReminderDate } from '../utils/helpers';
+import { buildLetterFormData } from '../utils/helpers';
 
+/* =====================================================================
+   SIGNATURE OPTIONS
+   - Used in the Signature/Approval dropdown for BOTH "Add Letter"
+     and "Reply to Letter" tabs.
+   - To add/remove options for a specific tab, make this conditional
+     on `activeTab`.
+   ===================================================================== */
 const SIGNATURE_OPTIONS = [
   'Approved & Signed',
   'Pending Approval',
@@ -22,78 +29,147 @@ export default function AddLetterFullPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(!!editId);
   const [saving, setSaving] = useState(false);
-  const [pdfFile, setPdfFile] = useState(null);
-  const [form, setForm] = useState({
+
+  /* ===================================================================
+     ACTIVE TAB STATE
+     - "add"   → Shows the "Add Letter" form
+     - "reply" → Shows the "Reply to Letter" form
+     - Each tab has its own independent form state.
+     - To customize fields per tab, wrap them in:
+         {activeTab === "add" && ( ... )}
+         {activeTab === "reply" && ( ... )}
+     =================================================================== */
+  const [activeTab, setActiveTab] = useState("add");
+
+  const [incomingFile, setIncomingFile] = useState(null);
+  const [replyFile, setReplyFile] = useState(null);
+
+  /* ===================================================================
+     FORM STATE (SEPARATE PARTS)
+     - Part A captures incoming letter registration details.
+     - Part B captures reply/outgoing letter details and is optional.
+     =================================================================== */
+  // ================================
+// ADD LETTER FORM STATE
+// ================================
+const [incomingForm, setIncomingForm] = useState({
     dateReceived: new Date().toISOString().split('T')[0],
     referredEntity: '',
     letterNumber: '',
     letterDate: '',
     title: '',
     fileNumber: '',
+});
+
+
+
+// ================================
+// REPLY LETTER FORM STATE
+// ================================
+const [replyForm, setReplyForm] = useState({
     actionTaken: '',
     signatureStatus: '',
     presentedTo: '',
     dateFileTransferred: '',
-    dateOfFiling: '',
+    dateFileReceived: '',
     dateOfSignature: '',
     dateOfMailing: '',
     sendTo: [],
     sendCopiesTo: [],
-    customRecipientName: '',
-    status: 'Draft',
     reminderDate: '',
-    entryType: 'full',
-  });
+    customRecipientName: '',
+});
 
+  /* ===================================================================
+     FETCH CATEGORIES (used by Send To / Send Copies To dropdowns)
+     =================================================================== */
   useEffect(() => {
     lettersApi.categories().then(({ data }) => setCategories(data));
   }, []);
 
+  /* ===================================================================
+     LOAD EXISTING LETTER FOR EDITING
+     - Only runs when `editId` is present in URL params.
+     - Populates the shared form state.
+     =================================================================== */
   useEffect(() => {
     if (!editId) {
-      setForm((f) => ({ ...f, reminderDate: defaultReminderDate(f.dateReceived) }));
+      setLoading(false);
       return;
     }
     lettersApi.get(editId)
       .then(({ data }) => {
-        setForm({
+        setIncomingForm({
           dateReceived: data.dateReceived?.split('T')[0] || '',
           referredEntity: data.referredEntity || '',
           letterNumber: data.letterNumber || '',
           letterDate: data.letterDate?.split('T')[0] || '',
           title: data.title || '',
           fileNumber: data.fileNumber || '',
+          dateOfFiling: data.dateOfFiling?.split('T')[0] || '',
+        });
+        setReplyForm({
           actionTaken: data.actionTaken || '',
           signatureStatus: data.signatureStatus || '',
           presentedTo: data.presentedTo || '',
           dateFileTransferred: data.dateFileTransferred?.split('T')[0] || '',
-          dateOfFiling: data.dateOfFiling?.split('T')[0] || '',
+          dateFileReceived: data.dateFileReceived?.split('T')[0] || '',
           dateOfSignature: data.dateOfSignature?.split('T')[0] || '',
           dateOfMailing: data.dateOfMailing?.split('T')[0] || '',
           sendTo: data.sendTo || [],
           sendCopiesTo: data.sendCopiesTo || [],
-          customRecipientName: data.customRecipientName || '',
-          status: data.status || 'Draft',
           reminderDate: data.reminderDate?.split('T')[0] || '',
-          entryType: 'full',
+          customRecipientName: data.customRecipientName || '',
         });
       })
       .finally(() => setLoading(false));
   }, [editId]);
 
-  const set = (key, val) => setForm((f) => {
-    const next = { ...f, [key]: val };
-    if (key === 'dateReceived' && !editId) {
-      next.reminderDate = defaultReminderDate(val);
-    }
-    return next;
-  });
+  /* ===================================================================
+     FORM FIELD UPDATER
+     - Helper to update a single field in the shared form state.
+     - Auto-updates reminderDate when dateReceived changes (new entries).
+     =================================================================== */
+  const setIncoming = (key, value) => {
+    setIncomingForm((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
+  const setReply = (key, value) => {
+    setReplyForm((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  /* ===================================================================
+     SAVE HANDLER (SHARED BY BOTH TABS)
+     - Saves the letter as Draft or Completed.
+     - Currently identical for both tabs. To differentiate behavior
+       per tab, check `activeTab` inside this function.
+     - Example:
+         if (activeTab === "reply") {
+           payload.isReply = true;
+           // add reply-specific fields
+         }
+     =================================================================== */
   const save = async (asDraft) => {
+    if (!asDraft && activeTab === 'add') {
+      if (!incomingForm.dateReceived || !incomingForm.referredEntity || !incomingForm.letterNumber || !incomingForm.title) {
+        showToast('Date Received, Referring Organization, Letter Number and Subject are required', 'error');
+        return;
+      }
+    }
+
     setSaving(true);
     try {
-      const payload = { ...form, status: asDraft ? 'Draft' : 'Completed' };
-      const fd = buildLetterFormData(payload, pdfFile);
+      const payload = activeTab === 'add'
+        ? { ...incomingForm, status: asDraft ? 'Draft' : 'Completed' }
+        : { ...replyForm, status: asDraft ? 'Draft' : 'Completed' };
+      const fileToUpload = activeTab === 'reply' ? replyFile : incomingFile;
+      const fd = buildLetterFormData(payload, fileToUpload);
       if (editId) {
         await lettersApi.update(editId, fd);
         showToast('Letter updated');
@@ -109,131 +185,254 @@ export default function AddLetterFullPage() {
     }
   };
 
+  /* ===================================================================
+     LOADING STATE
+     - Shows while fetching an existing letter for editing.
+     - Header title changes based on `activeTab`.
+     =================================================================== */
   if (loading) {
     return (
       <>
-        <Header title="Add Letter / ලිපියක් එක් කරන්න" />
+        {/* HEADER — changes title based on active tab */}
+        <Header
+          title={
+            activeTab === "add"
+              ? "Add Letter / ලිපියක් එක් කරන්න"
+              : "Reply to Letter / පිළිතුරු ලිපිය"
+          }
+        />
         <div className="content-body"><Loading /></div>
       </>
     );
   }
 
-  const showOther = form.sendTo.includes('Other') || form.sendCopiesTo.includes('Other');
+  const showOther = (replyForm.sendTo || []).includes('Other') || (replyForm.sendCopiesTo || []).includes('Other');
 
   return (
     <>
-      <Header title="Add Letter / ලිපියක් එක් කරන්න" />
+      {/* =============================================================
+          PAGE HEADER
+          - Title changes based on active tab ("Add Letter" vs "Reply to Letter")
+          - CHANGE HERE: Modify titles for each tab mode
+          ============================================================= */}
+      <Header
+        title={
+          activeTab === "add"
+            ? "Add Letter / ලිපියක් එක් කරන්න"
+            : "Reply to Letter / පිළිතුරු ලිපිය"
+        }
+      />
+
       <div className="content-body">
+
+        {/* =============================================================
+            TAB SWITCHER — "Add Letter" / "Reply to Letter"
+            - Clicking a tab sets `activeTab` state to "add" or "reply"
+            - The active tab gets the "active" CSS class for styling
+            - CHANGE HERE: To add more tabs, add another <button> and
+              update the `activeTab` state values accordingly
+            ============================================================= */}
+        <div className="letter-tabs">
+          {/* --- ADD LETTER TAB BUTTON --- */}
+          <button
+            className={`letter-tab ${activeTab === "add" ? "active" : ""}`}
+            onClick={() => setActiveTab("add")}
+          >
+            Add Letter
+          </button>
+
+          {/* --- REPLY TO LETTER TAB BUTTON --- */}
+          <button
+            className={`letter-tab ${activeTab === "reply" ? "active" : ""}`}
+            onClick={() => setActiveTab("reply")}
+          >
+            Reply to Letter
+          </button>
+        </div>
+
+        {/* =============================================================
+            FORM CARD — Contains all form fields
+            - Currently the same fields are shown for BOTH tabs.
+            - To show/hide fields per tab, wrap them in:
+                {activeTab === "add" && ( <div>...</div> )}
+                {activeTab === "reply" && ( <div>...</div> )}
+            ============================================================= */}
         <div className="card form-container-card">
+
+          {/* -----------------------------------------------------------
+              FORM HEADER BAR
+              - Displays the Sinhala + English form title
+              - Shows "Edit Entry" or "New Entry" indicator
+              - CHANGE HERE: Titles change based on activeTab
+              ----------------------------------------------------------- */}
           <div className="form-header-bar">
             <div className="form-header-titles">
-              <h2>ලිපි ලියාපදිංචි කිරීමේ ආකෘතිය</h2>
-              <h3>Register Incoming Letter Form</h3>
+              {/* TAB-SPECIFIC TITLES */}
+              {activeTab === "add" ? (
+                <>
+                  {/* ADD LETTER — Form heading (Sinhala + English) */}
+                  <h2>ලිපි ලියාපදිංචි කිරීමේ ආකෘතිය</h2>
+                  <h3>Register Incoming Letter Form</h3>
+                </>
+              ) : (
+                <>
+                  {/* REPLY TO LETTER — Form heading (Sinhala + English) */}
+                  <h2>පිළිතුරු ලිපි ආකෘතිය</h2>
+                  <h3>Reply Letter Form</h3>
+                </>
+              )}
             </div>
-            <span className="form-edit-indicator">{editId ? 'Edit Entry' : 'New Entry / නව ඇතුළත් කිරීම'}</span>
+            <span className="form-edit-indicator">
+
+{
+    editId
+        ? "Edit Entry"
+        : activeTab === "add"
+        ? "New Letter"
+        : "New Reply"
+}
+
+</span>
           </div>
 
-          <div className="form-grid">
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Date Received *</span></label>
-              <input type="date" value={form.dateReceived} onChange={(e) => set('dateReceived', e.target.value)} required />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Referring Organization *</span></label>
-              <input type="text" value={form.referredEntity} onChange={(e) => set('referredEntity', e.target.value)} required />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Letter Number *</span></label>
-              <input type="text" value={form.letterNumber} onChange={(e) => set('letterNumber', e.target.value)} required />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Letter Date</span></label>
-              <input type="date" value={form.letterDate} onChange={(e) => set('letterDate', e.target.value)} />
-            </div>
-            <div className="form-field-group field-span-full">
-              <label className="bilingual-label"><span className="eng-lbl">Subject *</span></label>
-              <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)} required />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">File Number</span></label>
-              <input type="text" value={form.fileNumber} onChange={(e) => set('fileNumber', e.target.value)} />
-            </div>
-            <div className="form-field-group field-span-full">
-              <label className="bilingual-label"><span className="eng-lbl">Action Taken</span></label>
-              <textarea rows={2} value={form.actionTaken} onChange={(e) => set('actionTaken', e.target.value)} />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Signature / Approval</span></label>
-              <select value={form.signatureStatus} onChange={(e) => set('signatureStatus', e.target.value)}>
-                <option value="">-- Select --</option>
-                {SIGNATURE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
-              </select>
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Presented To</span></label>
-              <input type="text" value={form.presentedTo} onChange={(e) => set('presentedTo', e.target.value)} />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Date File Transferred</span></label>
-              <input type="date" value={form.dateFileTransferred} onChange={(e) => set('dateFileTransferred', e.target.value)} />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Date of Filing</span></label>
-              <input type="date" value={form.dateOfFiling} onChange={(e) => set('dateOfFiling', e.target.value)} />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Date of Signature</span></label>
-              <input type="date" value={form.dateOfSignature} onChange={(e) => set('dateOfSignature', e.target.value)} />
-            </div>
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Date of Mailing</span></label>
-              <input type="date" value={form.dateOfMailing} onChange={(e) => set('dateOfMailing', e.target.value)} />
-            </div>
-            <div className="form-field-group field-span-half">
-              <label className="bilingual-label"><span className="eng-lbl">Send To *</span></label>
-              <MultiSelect
-                options={categories.map((c) => ({ value: c.value, label: c.label }))}
-                value={form.sendTo}
-                onChange={(v) => set('sendTo', v)}
-                placeholder="Select channels"
-              />
-            </div>
-            <div className="form-field-group field-span-half">
-              <label className="bilingual-label"><span className="eng-lbl">Send Copies To</span></label>
-              <MultiSelect
-                options={categories.map((c) => ({ value: c.value, label: c.label }))}
-                value={form.sendCopiesTo}
-                onChange={(v) => set('sendCopiesTo', v)}
-                placeholder="Select CC channels"
-              />
-            </div>
-            {showOther && (
+          {/* -----------------------------------------------------------
+              FORM FIELDS GRID
+              - Part A is the incoming letter form.
+              - Part B is the reply/outgoing letter form.
+              - They use separate state objects and do not share values.
+              ----------------------------------------------------------- */}
+          {activeTab === 'add' ? (
+            <div className="form-grid">
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Date Received *</span></label>
+                <input type="date" value={incomingForm.dateReceived} onChange={(e) => setIncoming('dateReceived', e.target.value)} required />
+              </div>
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Referring Organization / Institution *</span></label>
+                <input type="text" value={incomingForm.referredEntity} onChange={(e) => setIncoming('referredEntity', e.target.value)} required />
+              </div>
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Letter Number *</span></label>
+                <input type="text" value={incomingForm.letterNumber} onChange={(e) => setIncoming('letterNumber', e.target.value)} required />
+              </div>
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Subject of the Letter *</span></label>
+                <input type="text" value={incomingForm.title} onChange={(e) => setIncoming('title', e.target.value)} required />
+              </div>
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">File Number</span></label>
+                <input type="text" value={incomingForm.fileNumber} onChange={(e) => setIncoming('fileNumber', e.target.value)} />
+              </div>
+
               <div className="form-field-group field-span-full">
-                <label className="bilingual-label"><span className="eng-lbl">Other Recipient Name *</span></label>
-                <input type="text" value={form.customRecipientName} onChange={(e) => set('customRecipientName', e.target.value)} />
-              </div>
-            )}
-            <div className="form-field-group">
-              <label className="bilingual-label"><span className="eng-lbl">Reminder Date</span></label>
-              <input type="date" value={form.reminderDate} onChange={(e) => set('reminderDate', e.target.value)} />
-            </div>
-            <div className="form-field-group field-span-full">
-              <label className="bilingual-label"><span className="eng-lbl">PDF Upload</span></label>
-              <div className="file-uploader-box">
-                <input type="file" accept="application/pdf" onChange={(e) => setPdfFile(e.target.files[0])} />
-                {pdfFile && <span className="pdf-name">{pdfFile.name}</span>}
+                <label className="bilingual-label"><span className="eng-lbl">Document Upload</span></label>
+                <div className="file-uploader-box">
+                  <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => setIncomingFile(e.target.files[0])} />
+                  {incomingFile && <span className="pdf-name">{incomingFile.name}</span>}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="form-grid">
+              <div className="form-field-group field-span-full">
+                <label className="bilingual-label"><span className="eng-lbl">Action Taken on the Letter</span></label>
+                <textarea rows={2} value={replyForm.actionTaken} onChange={(e) => setReply('actionTaken', e.target.value)} />
+              </div>
 
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Signature / Approval / Instructions</span></label>
+                <select value={replyForm.signatureStatus} onChange={(e) => setReply('signatureStatus', e.target.value)}>
+                  <option value="">-- Select --</option>
+                  {SIGNATURE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+                </select>
+              </div>
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Date File Forwarded</span></label>
+                <input type="date" value={replyForm.dateFileTransferred} onChange={(e) => setReply('dateFileTransferred', e.target.value)} />
+              </div>
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Date File Received</span></label>
+                <input type="date" value={replyForm.dateFileReceived} onChange={(e) => setReply('dateFileReceived', e.target.value)} />
+              </div>
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Date Signed (Letter Date)</span></label>
+                <input type="date" value={replyForm.dateOfSignature} onChange={(e) => setReply('dateOfSignature', e.target.value)} />
+              </div>
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Date Mailed / Posted</span></label>
+                <input type="date" value={replyForm.dateOfMailing} onChange={(e) => setReply('dateOfMailing', e.target.value)} />
+              </div>
+
+              <div className="form-field-group field-span-half">
+                <label className="bilingual-label"><span className="eng-lbl">Submitted By / Send By</span></label>
+                <MultiSelect
+                  options={categories.map((c) => ({ value: c.value, label: c.label }))}
+                  value={replyForm.sendTo}
+                  onChange={(v) => setReply('sendTo', v)}
+                  placeholder="Select recipients"
+                />
+              </div>
+
+              <div className="form-field-group field-span-half">
+                <label className="bilingual-label"><span className="eng-lbl">Send By Copies</span></label>
+                <MultiSelect
+                  options={categories.map((c) => ({ value: c.value, label: c.label }))}
+                  value={replyForm.sendCopiesTo}
+                  onChange={(v) => setReply('sendCopiesTo', v)}
+                  placeholder="Select CC recipients"
+                />
+              </div>
+
+              {showOther && (
+                <div className="form-field-group field-span-full">
+                  <label className="bilingual-label"><span className="eng-lbl">Other Recipient Name</span></label>
+                  <input type="text" value={replyForm.customRecipientName} onChange={(e) => setReply('customRecipientName', e.target.value)} />
+                </div>
+              )}
+
+              <div className="form-field-group">
+                <label className="bilingual-label"><span className="eng-lbl">Reminder Date</span></label>
+                <input type="date" value={replyForm.reminderDate} onChange={(e) => setReply('reminderDate', e.target.value)} />
+              </div>
+
+              <div className="form-field-group field-span-full">
+                <label className="bilingual-label"><span className="eng-lbl">Document Upload</span></label>
+                <div className="file-uploader-box">
+                  <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => setReplyFile(e.target.files[0])} />
+                  {replyFile && <span className="pdf-name">{replyFile.name}</span>}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* -----------------------------------------------------------
+              FORM ACTION FOOTER (SHARED BY BOTH TABS)
+              - Cancel, Save Draft, and Complete buttons
+              - To customize button text or behavior per tab, check
+                `activeTab` here. Example:
+                  <button onClick={() => save(false)}>
+                    {activeTab === "reply" ? "Send Reply" : "Complete"}
+                  </button>
+              ----------------------------------------------------------- */}
           <div className="form-action-footer">
             <button type="button" className="btn btn-outline" onClick={() => navigate('/letters')}>Cancel</button>
             <div className="submit-action-buttons">
-              <button type="button" className="btn btn-secondary" disabled={saving} onClick={() => save(true)}>Save Draft</button>
-              <button type="button" className="btn btn-primary" disabled={saving} onClick={() => save(false)}>Complete</button>
+              <button type="button" className="btn btn-secondary" disabled={saving} onClick={() => save(true)}>Draft Stage</button>
+              <button type="button" className="btn btn-primary" disabled={saving} onClick={() => save(false)}>Submit & Register</button>
             </div>
           </div>
+
         </div>
+        {/* --- END FORM CARD --- */}
+
       </div>
     </>
   );

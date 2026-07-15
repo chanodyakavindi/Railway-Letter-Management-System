@@ -171,7 +171,88 @@
 
 .menu-item { text-decoration: none; color: inherit; }
 
+/* Ensure sidebar labels and details are always visible (override collapsed/hover-only rules) */
+.sidebar .brand-texts,
+.sidebar .user-details,
+.sidebar .menu-item span,
+.sidebar .menu-badge,
+.sidebar .brand-main {
+  display: block !important;
+  opacity: 1 !important;
+}
+
+/* Make sure access pill is visible */
+.user-access-pill { display: inline-block !important; }
+
+/* Tweak theme toggle layout in case theme button is added */
+.sidebar-footer { display: flex; gap: 8px; align-items: center; }
+.theme-toggle-btn { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Light-mode specific fixes: ensure sidebar text is readable when not hovered */
+body:not(.dark-theme) .sidebar {
+  background-color: var(--bg-card) !important;
+  color: var(--text-soft) !important;
+}
+
+body:not(.dark-theme) .sidebar .menu-item,
+body:not(.dark-theme) .sidebar .menu-item span {
+  color: var(--text-soft) !important;
+  opacity: 1 !important;
+}
+
+body:not(.dark-theme) .sidebar .menu-item:hover,
+body:not(.dark-theme) .sidebar .menu-item.active {
+  color: var(--text-main) !important;
+}
+
 a.btn { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* ==========================================================================
+   LETTER TABS — Add Letter / Reply to Letter switcher
+   - .letter-tabs: container for the tab buttons
+   - .letter-tab: individual tab button
+   - .letter-tab.active: the currently selected tab
+   ========================================================================== */
+.letter-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-radius: var(--radius-sm, 8px);
+  overflow: hidden;
+  border: 1px solid var(--c-border, var(--border-color));
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.letter-tab {
+  flex: 1;
+  padding: 12px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  border: none;
+  background: var(--c-surface-card, var(--bg-card));
+  color: var(--c-text-secondary, var(--text-soft));
+  transition: all 0.25s ease;
+  position: relative;
+}
+
+.letter-tab:hover {
+  background: var(--c-surface-muted, var(--bg-card-alt));
+  color: var(--c-text-primary, var(--text-main));
+}
+
+.letter-tab.active {
+  background: var(--c-brand-50, var(--railway-gold-soft));
+  color: var(--c-brand-800, var(--railway-gold));
+  box-shadow: inset 0 -3px 0 var(--c-brand-800, var(--railway-gold));
+}
+
+.letter-tab + .letter-tab {
+  border-left: 1px solid var(--c-border, var(--border-color));
+}
 
 @media (max-width: 768px) {
   .header-actions-row { flex-wrap: wrap; }
