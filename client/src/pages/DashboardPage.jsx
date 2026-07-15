@@ -26,7 +26,19 @@ export default function DashboardPage() {
     ])
       .then(([s, r, d]) => {
         setStats(s.data);
-        setRecent(r.data);
+        // Defensive: ensure `recent` is always an array before using .map
+        if (!r || !r.data) {
+          console.warn('dashboard.recent returned empty response', r);
+          setRecent([]);
+        } else if (Array.isArray(r.data)) {
+          setRecent(r.data);
+        } else if (typeof r.data === 'object' && r.data.items && Array.isArray(r.data.items)) {
+          // Support alternative response shape { items: [...] }
+          setRecent(r.data.items);
+        } else {
+          console.warn('dashboard.recent returned unexpected shape:', r.data);
+          setRecent([]);
+        }
         setSummary(d.data);
       })
       .finally(() => setLoading(false));

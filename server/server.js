@@ -40,17 +40,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Serve the single frontend build from /client/dist (SPA fallback)
-const clientBuildDir = path.join(__dirname, '..', 'client', 'dist');
-if (fs.existsSync(clientBuildDir)) {
-  app.use(express.static(clientBuildDir));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(clientBuildDir, 'index.html'));
-  });
-} else {
-  console.warn('Client build directory not found at', clientBuildDir, '. Static frontend will not be served.');
-}
-
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'RLMS API' });
 });
@@ -64,6 +53,19 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/audit-logs', auditRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/ai', aiRoutes);
+
+// Serve the single frontend build from /client/dist (SPA fallback)
+const clientBuildDir = path.join(__dirname, '..', 'client', 'dist');
+if (fs.existsSync(clientBuildDir)) {
+  app.use(express.static(clientBuildDir));
+  // SPA fallback - only after API routes are registered so /api/* are not intercepted
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(clientBuildDir, 'index.html'));
+  });
+} else {
+  console.warn('Client build directory not found at', clientBuildDir, '. Static frontend will not be served.');
+}
 
 app.use(errorHandler);
 
