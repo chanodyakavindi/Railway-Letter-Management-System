@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import EmptyState from '../components/EmptyState';
@@ -13,6 +13,7 @@ import { formatDate } from '../utils/helpers';
 export default function AllLettersPage() {
   const { hasRole, user } = useAuth();
   const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
   const [letters, setLetters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -24,6 +25,15 @@ export default function AllLettersPage() {
       .then(({ data }) => setLetters(data))
       .finally(() => setLoading(false));
   };
+
+  useEffect(() => {
+    const status = searchParams.get('status') || '';
+    const search = searchParams.get('search') || '';
+    const recipient = searchParams.get('recipient') || '';
+    const dateFrom = searchParams.get('dateFrom') || '';
+    const dateTo = searchParams.get('dateTo') || '';
+    setFilters({ status, search, recipient, dateFrom, dateTo });
+  }, [searchParams]);
 
   useEffect(() => { load(); }, [filters]);
 

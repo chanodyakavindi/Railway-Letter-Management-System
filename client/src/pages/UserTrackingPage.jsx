@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import EmptyState from '../components/EmptyState';
@@ -6,6 +7,7 @@ import { usersApi } from '../api';
 import { formatDateTime } from '../utils/helpers';
 
 export default function UserTrackingPage() {
+  const [searchParams] = useSearchParams();
   const [tracking, setTracking] = useState([]);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -13,11 +15,14 @@ export default function UserTrackingPage() {
   useEffect(() => {
     usersApi.tracking()
       .then(({ data }) => {
-        setTracking(data);
-        if (data.length) setSelected(data[0]);
+        const trackingData = data || [];
+        setTracking(trackingData);
+        const userId = searchParams.get('user');
+        const matchedUser = trackingData.find((t) => t.user._id === userId);
+        setSelected(matchedUser || trackingData[0] || null);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [searchParams]);
 
   return (
     <>

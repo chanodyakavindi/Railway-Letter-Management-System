@@ -1,21 +1,38 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import StatusBadge from '../components/StatusBadge';
 import LetterDetailsModal from '../components/LetterDetailsModal';
 import { useAuth } from '../context/AuthContext';
-import { dashboardApi } from '../api';
+import { dashboardApi, usersApi } from '../api';
 import { formatDate } from '../utils/helpers';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [period, setPeriod] = useState('daily');
   const [stats, setStats] = useState(null);
   const [recent, setRecent] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [tracking, setTracking] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
+
+  const navigateToLetters = (status = '') => {
+    const query = status ? `?status=${encodeURIComponent(status)}` : '';
+    navigate(`/letters${query}`);
+  };
+
+  const navigateToReminders = () => navigate('/reminders');
+  const navigateToUserTracking = (userId) => navigate(`/user-tracking?user=${encodeURIComponent(userId)}`);
+
+  const keyboardClick = (action) => (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      action();
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -41,8 +58,20 @@ export default function DashboardPage() {
         }
         setSummary(d.data);
       })
+      .catch((err) => {
+        console.error('Dashboard load failed', err);
+      })
       .finally(() => setLoading(false));
   }, [period]);
+
+  useEffect(() => {
+    usersApi.tracking()
+      .then(({ data }) => setTracking(data || []))
+      .catch((err) => {
+        console.error('User tracking load failed', err);
+        setTracking([]);
+      });
+  }, []);
 
   if (loading) {
     return (
@@ -80,19 +109,43 @@ export default function DashboardPage() {
           </div>
 
           <div className="stats-card-grid four-cols">
-            <div className="stat-card border-left-orange">
+            <div
+              className="stat-card border-left-orange clickable-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigateToLetters('Draft')}
+              onKeyDown={keyboardClick(() => navigateToLetters('Draft'))}
+            >
               <div className="stat-main"><span className="stat-number">{stats?.draft || 0}</span></div>
               <span className="stat-label">Draft Letters / කෙටුම්පත්</span>
             </div>
-            <div className="stat-card border-left-green">
+            <div
+              className="stat-card border-left-green clickable-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigateToLetters('Completed')}
+              onKeyDown={keyboardClick(() => navigateToLetters('Completed'))}
+            >
               <div className="stat-main"><span className="stat-number">{stats?.completed || 0}</span></div>
               <span className="stat-label">Completed / අවසන්</span>
             </div>
-            <div className="stat-card border-left-blue">
+            <div
+              className="stat-card border-left-blue clickable-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigateToLetters()}
+              onKeyDown={keyboardClick(() => navigateToLetters())}
+            >
               <div className="stat-main"><span className="stat-number">{stats?.total || 0}</span></div>
               <span className="stat-label">All Letters / සියලු</span>
             </div>
-            <div className="stat-card border-left-purple">
+            <div
+              className="stat-card border-left-purple clickable-card"
+              role="button"
+              tabIndex={0}
+              onClick={navigateToReminders}
+              onKeyDown={keyboardClick(navigateToReminders)}
+            >
               <div className="stat-main">
                 <span className="stat-number">{stats?.activeReminders || 0}</span>
                 <div className="stat-sub-metrics">
@@ -132,6 +185,37 @@ export default function DashboardPage() {
                 <div className="summary-item">Overdue: <strong>{summary.overdue?.length || 0}</strong></div>
                 <div className="summary-item">Completed Today: <strong>{summary.completedToday?.length || 0}</strong></div>
                 <div className="summary-item">Old Drafts (7d+): <strong>{summary.oldDrafts?.length || 0}</strong></div>
+              </div>
+            </div>
+          )}
+
+          {tracking.length > 0 && (
+            <div className="card" style={{ marginBottom: 20 }}>
+              <div className="card-header">
+                <h3>User Activity / පරිශීලක ක්‍රියාකාරීත්වය</h3>
+              </div>
+              <div className="user-bar-chart">
+                {tracking.map((t) => {
+                  const totalCount = t.stats.completed + t.stats.draft + t.stats.pending + t.stats.overdue;
+                  const maxCount = Math.max(1, stats?.total || totalCount);
+                  const width = Math.min(100, Math.round((totalCount / maxCount) * 100));
+                  return (
+                    <div
+                      key={t.user._id}
+                      className="user-bar-row"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => navigateToUserTracking(t.user._id)}
+                      onKeyDown={keyboardClick(() => navigateToUserTracking(t.user._id))}
+                    >
+                      <span className="user-bar-label">{t.user.fullName}</span>
+                      <span className="user-bar-visual">
+                        <span className="user-bar-fill" style={{ width: `${width}%` }} />
+                      </span>
+                      <span className="user-bar-value">{totalCount}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

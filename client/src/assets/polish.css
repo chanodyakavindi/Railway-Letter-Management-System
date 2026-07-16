@@ -131,9 +131,9 @@
   --c-surface-muted:   #271a1d;
   --c-surface-sidebar: #17090c;
 
-  --c-text-primary:   #f2ecec;
-  --c-text-secondary: #b6a7a9;
-  --c-text-tertiary:  #86787a;
+  --c-text-primary:   #ffffff;
+  --c-text-secondary: #e2e8f0;
+  --c-text-tertiary:  #cbd5e1;
 
   --c-border:       #3a2a2d;
   --c-border-strong:#4d3a3d;
@@ -314,7 +314,7 @@
   font-weight: 600;
 }
 
-.user-name-display { color: #edf0f4; }
+.user-name-display { color: var(--c-text-inverse); }
 .user-role-display { color: var(--c-text-sidebar); }
 
 .user-access-pill {
