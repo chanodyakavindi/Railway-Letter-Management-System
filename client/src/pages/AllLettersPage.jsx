@@ -8,7 +8,7 @@ import LetterDetailsModal from '../components/LetterDetailsModal';
 import { lettersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { formatDate } from '../utils/helpers';
+import { formatDate, getLetterRowClasses } from '../utils/helpers';
 
 export default function AllLettersPage() {
   const { hasRole, user } = useAuth();
@@ -100,7 +100,7 @@ export default function AllLettersPage() {
                 </thead>
                 <tbody>
                   {letters.map((l) => (
-                    <tr key={l._id} className={`row-status-${l.status?.toLowerCase()}`}>
+                    <tr key={l._id} className={getLetterRowClasses(l.status, l.reminderStatus)}>
                       <td>{l.letterId}</td>
                       <td>{formatDate(l.dateReceived)}</td>
                       <td>{l.title}</td>

@@ -11,6 +11,7 @@ const {
   syncLetterOverdueStatus,
   computeReminderStatus,
 } = require('../utils/letterHelpers');
+const { buildNotificationPayload } = require('../utils/notifications');
 const { canViewLetter, canEditLetter, buildLetterFilter } = require('../middleware/rbac');
 
 function parseLetterBody(body) {
@@ -248,6 +249,15 @@ exports.updateStatus = async (req, res, next) => {
     letter.updatedBy = req.user._id;
     await letter.save();
 
+    const notificationPayload = buildNotificationPayload(letter);
+    if (notificationPayload) {
+      await Notification.create({
+        user: letter.createdBy,
+        relatedLetter: letter._id,
+        ...notificationPayload,
+      });
+    }
+
     await createAuditLog({
       user: req.user,
       action: `User changed letter status to ${status}`,
@@ -289,6 +299,15 @@ exports.updateReminder = async (req, res, next) => {
     letter.updatedBy = req.user._id;
     syncLetterOverdueStatus(letter);
     await letter.save();
+
+    const notificationPayload = buildNotificationPayload(letter);
+    if (notificationPayload) {
+      await Notification.create({
+        user: letter.createdBy,
+        relatedLetter: letter._id,
+        ...notificationPayload,
+      });
+    }
 
     await createAuditLog({
       user: req.user,

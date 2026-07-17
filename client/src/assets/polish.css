@@ -293,12 +293,12 @@
   letter-spacing: 0.6px;
   line-height: 1.35;
   text-align: center;
-  color: var(--c-text-inverse);
+  color: var(--text-main);
 }
 
 .brand-sub {
   font-size: 10px;
-  color: var(--c-text-sidebar);
+  color: var(--text-soft);
 }
 
 .current-user-card {
@@ -314,8 +314,8 @@
   font-weight: 600;
 }
 
-.user-name-display { color: var(--c-text-inverse); }
-.user-role-display { color: var(--c-text-sidebar); }
+.user-name-display { color: var(--text-main); }
+.user-role-display { color: var(--text-soft); }
 
 .user-access-pill {
   display: none !important;

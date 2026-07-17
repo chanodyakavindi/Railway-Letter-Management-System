@@ -1,7 +1,7 @@
-import { statusClass, reminderStatusClass } from '../utils/helpers';
+import { getLetterBadgeClasses, getLetterDisplayLabel } from '../utils/helpers';
 
 export default function StatusBadge({ status, reminderStatus }) {
-  const cls = reminderStatus ? reminderStatusClass(reminderStatus) : statusClass(status);
-  const label = status || reminderStatus || 'Unknown';
-  return <span className={`status-badge ${cls}`}>{label}</span>;
+  const classes = getLetterBadgeClasses(status, reminderStatus);
+  const label = getLetterDisplayLabel(status, reminderStatus);
+  return <span className={`status-badge ${classes.join(' ')}`}>{label}</span>;
 }

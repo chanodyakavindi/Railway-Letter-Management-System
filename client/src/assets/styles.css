@@ -90,6 +90,59 @@ body {
  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
+.content-body,
+.card,
+.modal-dialog,
+.data-table,
+.data-table th,
+.data-table td,
+.card-header,
+.summary-item,
+.notification-item,
+.reply-item,
+.form-field-group label,
+.meta-label,
+.meta-val,
+.table-empty-state,
+.table-empty-state h4,
+.table-empty-state p,
+.legend-chip,
+.filter-group label,
+.export-select-all-label,
+.reminder-section-title h3,
+.reminder-section-title p,
+.preview-filename-badge,
+.ai-progress-status-title,
+.ocr-step,
+.file-limits-note,
+.modal-header-titles h3,
+.modal-subtitle,
+.header-user,
+.header-search,
+.header-actions-row,
+.menu-item span,
+.menu-item,
+.stat-card,
+.summary-card,
+.card-title,
+.form-label,
+.bilingual-label,
+.search-input,
+.input-field,
+.textarea-field,
+.modal-body,
+.modal-footer,
+.section-title,
+.section-subtitle,
+.empty-state-title,
+.empty-state-message,
+.toggle-label,
+.filter-title,
+.page-title,
+.page-subtitle {
+ color: var(--text-main);
+}
+
 input, select, textarea, button {
  font-family: inherit;
  font-size: inherit;
@@ -359,11 +412,12 @@ input, select, textarea, button {
  font-size: 13px;
  font-weight: 800;
  letter-spacing: 1px;
+ color: var(--text-main);
 }
 
 .brand-sub {
  font-size: 9px;
- color: var(--text-muted);
+ color: var(--text-soft);
  font-weight: 600;
  text-transform: uppercase;
 }
@@ -382,7 +436,7 @@ input, select, textarea, button {
  height: 38px;
  border-radius: 50%;
  background-color: var(--railway-gold);
- color: #000;
+ color: var(--text-main);
  display: flex;
  align-items: center;
  justify-content: center;
@@ -402,6 +456,7 @@ input, select, textarea, button {
  white-space: nowrap;
  overflow: hidden;
  text-overflow: ellipsis;
+ color: var(--text-main);
 }
 
 .user-role-display {
@@ -1188,7 +1243,7 @@ input, select, textarea, button {
  height: 100%;
  width: 0%;
  background: linear-gradient(90deg, var(--railway-blue), var(--color-success));
- color: #ffffff;
+ color: var(--text-main);
  font-size: 9px;
  font-weight: 800;
  display: flex;
@@ -1265,7 +1320,7 @@ input, select, textarea, button {
 
 .btn-primary {
  background-color: var(--railway-gold);
- color: #ffffff;
+ color: var(--text-main);
 }
 
 .btn-primary:hover {
@@ -1849,7 +1904,7 @@ input, select, textarea, button {
 .menu-badge {
  margin-left: auto;
  background-color: var(--color-pending);
- color: #ffffff;
+ color: var(--text-main);
  font-size: 9px;
  font-weight: 800;
  min-width: 18px;
@@ -2300,7 +2355,7 @@ input, select, textarea, button {
 
 .lang-btn.active {
  background-color: var(--railway-blue);
- color: #0b0f19;
+ color: var(--text-main);
 }
 
 /* ==========================================================================
@@ -2656,44 +2711,38 @@ body.lang-si #ai-form-title-english {
  left: 0;
  width: 100%;
  height: 100%;
- background: #ffffff;
+ background: var(--bg-card);
  z-index: 99999;
  overflow: auto;
  padding: 40px;
- color: #111827;
- border-bottom: 3px double #333;
+ color: var(--text-main);
+ border-bottom: 3px double var(--border-color);
 }
 
 .print-header h1 {
  font-family: var(--font-display);
  font-size: 22px;
  font-weight: 700;
- color: #1a1a1a;
+ color: var(--text-main);
  margin-bottom: 4px;
 }
 
 .print-header h2 {
  font-size: 16px;
  font-weight: 500;
- color: #555;
+ color: var(--text-soft);
  margin-bottom: 8px;
 }
 
 .print-header p {
  font-size: 12px;
- color: #888;
-}
-
-.print-table {
- width: 100%;
- border-collapse: collapse;
- font-size: 11px;
+ color: var(--text-muted);
  margin-bottom: 30px;
 }
 
 .print-table th {
- background: #1e293b;
- color: #ffffff;
+ background: var(--bg-card-alt);
+ color: var(--text-main);
  padding: 8px 10px;
  text-align: left;
  font-weight: 600;
@@ -2704,9 +2753,8 @@ body.lang-si #ai-form-title-english {
 
 .print-table td {
  padding: 7px 10px;
- border-bottom: 1px solid #e2e2e2;
- color: #333;
- vertical-align: top;
+ border-bottom: 1px solid var(--border-color);
+ color: var(--text-main);
 }
 
 .print-table tr:nth-child(even) td {
@@ -2716,12 +2764,9 @@ body.lang-si #ai-form-title-english {
 .print-footer {
  text-align: center;
  padding-top: 20px;
- border-top: 2px solid #ddd;
+ border-top: 2px solid var(--border-color);
  font-size: 10px;
- color: #999;
-}
-
-@media print {
+ color: var(--text-muted);
  /* Hide everything except the print area (visibility keeps nested preview printable) */
  body * {
  visibility: hidden;
@@ -2739,13 +2784,13 @@ body.lang-si #ai-form-title-english {
  top: 0 !important;
  width: 100% !important;
  padding: 20px !important;
- background: #ffffff !important;
- color: #111827 !important;
+ background: var(--bg-card) !important;
+ color: var(--text-main) !important;
  }
 
  .print-table th {
- background: #333 !important;
- color: #ffffff !important;
+ background: var(--bg-card-alt) !important;
+ color: var(--text-main) !important;
  -webkit-print-color-adjust: exact;
  print-color-adjust: exact;
  }
@@ -2988,8 +3033,8 @@ body.lang-si #ai-form-title-english {
 
 /* Scanned Document Paper Simulator */
 .simulated-letter-paper {
-  background-color: #ffffff;
-  color: #1f2937;
+  background-color: var(--bg-card);
+  color: var(--text-main);
   padding: 36px 40px;
   border-radius: 2px;
   box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.08);
@@ -3003,8 +3048,8 @@ body.lang-si #ai-form-title-english {
 }
 
 .dark-theme .simulated-letter-paper {
-  background-color: #ffffff;
-  color: #111827;
+  background-color: var(--bg-card);
+  color: var(--text-main);
 }
 
 .letterhead-mock {
@@ -3021,7 +3066,7 @@ body.lang-si #ai-form-title-english {
   height: 44px;
   border-radius: 50%;
   background-color: #1e3a8a;
-  color: #ffffff;
+  color: var(--text-main);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3074,7 +3119,7 @@ body.lang-si #ai-form-title-english {
 
 .placeholder-dot {
   font-weight: 700;
-  color: #111827;
+  color: var(--text-main);
   background-color: rgba(245, 158, 11, 0.08);
   padding: 2px 6px;
   border-radius: 4px;
@@ -3082,7 +3127,7 @@ body.lang-si #ai-form-title-english {
 
 .letter-recipient-mock {
   margin-bottom: 16px;
-  color: #4b5563;
+  color: var(--text-soft);
   font-size: 11.5px;
   line-height: 1.4;
 }
@@ -3090,15 +3135,11 @@ body.lang-si #ai-form-title-english {
 .letter-subject-mock {
   font-weight: 800;
   text-transform: uppercase;
-  border-bottom: 1px solid #374151;
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 4px;
   margin-bottom: 16px;
   font-size: 11.5px;
-  color: #111827;
-}
-
-.letter-text-mock {
-  color: #374151;
+  color: var(--text-main);
   text-align: justify;
   margin-bottom: 24px;
   flex: 1;
@@ -3118,8 +3159,7 @@ body.lang-si #ai-form-title-english {
 
 .sig-title {
   font-weight: 700;
-  color: #1f2937;
-  margin-top: 4px;
+  color: var(--text-main);
 }
 
 .sig-dept {

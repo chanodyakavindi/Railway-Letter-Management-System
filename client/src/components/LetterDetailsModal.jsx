@@ -54,7 +54,7 @@ export default function LetterDetailsModal({ letter, open, onClose, onReply }) {
         </div>
         <div className="meta-field">
           <span className="meta-label">Status / තත්වය</span>
-          <div className="meta-val"><StatusBadge status={letter.status} /></div>
+          <div className="meta-val"><StatusBadge status={letter.status} reminderStatus={letter.reminderStatus} /></div>
         </div>
         <div className="meta-field">
           <span className="meta-label">Reminder / මතක් කිරීම</span>

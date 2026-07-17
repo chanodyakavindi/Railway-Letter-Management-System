@@ -7,7 +7,7 @@ import Modal from '../components/Modal';
 import { remindersApi, lettersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { formatDate } from '../utils/helpers';
+import { formatDate, getLetterRowClasses } from '../utils/helpers';
 
 export default function RemindersPage() {
   const { hasRole } = useAuth();
@@ -58,7 +58,7 @@ export default function RemindersPage() {
       </thead>
       <tbody>
         {items.map((l) => (
-          <tr key={l._id} className={`reminder-row-${l.reminderStatus}`}>
+          <tr key={l._id} className={getLetterRowClasses(l.status, l.reminderStatus)}>
             <td>{l.letterId}</td>
             <td>{l.title}</td>
             <td>{l.referredEntity}</td>

@@ -19,10 +19,83 @@ export function statusClass(status) {
   return map[status] || 'badge-neutral';
 }
 
+function normalizeStateKey(value) {
+  return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+export function getLetterBadgeClasses(status, reminderStatus) {
+  const classes = [];
+  const normalizedStatus = normalizeStateKey(status);
+  const normalizedReminder = normalizeStateKey(reminderStatus);
+
+  if (normalizedStatus === 'draft') classes.push('badge-draft');
+  else if (normalizedStatus === 'pending') classes.push('badge-pending');
+  else if (normalizedStatus === 'completed') classes.push('badge-completed');
+  else if (normalizedStatus === 'noaction') classes.push('badge-noaction');
+  else if (normalizedStatus === 'overdue') classes.push('badge-overdue');
+  else classes.push('badge-neutral');
+
+  if (normalizedReminder === 'upcoming') classes.push('badge-upcoming');
+  else if (normalizedReminder === 'overdue' || normalizedReminder === 'noaction') classes.push('badge-overdue');
+  else if (normalizedReminder === 'completed') classes.push('badge-completed');
+
+  return [...new Set(classes)];
+}
+
+export function getLetterRowClasses(status, reminderStatus) {
+  const classes = [];
+  const normalizedStatus = normalizeStateKey(status);
+  const normalizedReminder = normalizeStateKey(reminderStatus);
+
+  if (normalizedStatus === 'draft') classes.push('row-status-draft');
+  else if (normalizedStatus === 'pending') classes.push('row-status-pending');
+  else if (normalizedStatus === 'completed') classes.push('row-status-completed');
+  else if (normalizedStatus === 'noaction') classes.push('row-status-noaction');
+  else if (normalizedStatus === 'overdue') classes.push('row-status-overdue');
+
+  if (normalizedReminder === 'upcoming') classes.push('row-status-reminder-upcoming');
+  if (normalizedReminder === 'overdue' || normalizedReminder === 'noaction') classes.push('row-status-reminder-overdue');
+
+  return classes.join(' ');
+}
+
+export function getLetterDisplayLabel(status, reminderStatus) {
+  const statusLabels = {
+    draft: 'Draft',
+    pending: 'Pending',
+    completed: 'Completed',
+    noaction: 'No Action',
+    overdue: 'Overdue',
+  };
+  const reminderLabels = {
+    upcoming: 'Upcoming Reminder',
+    overdue: 'Overdue Reminder',
+    noaction: 'No Action Reminder',
+    completed: 'Completed Reminder',
+  };
+
+  const normalizedStatus = normalizeStateKey(status);
+  const normalizedReminder = normalizeStateKey(reminderStatus);
+  const parts = [];
+
+  if (statusLabels[normalizedStatus]) {
+    parts.push(statusLabels[normalizedStatus]);
+  } else if (status) {
+    parts.push(status);
+  }
+
+  if (normalizedReminder && normalizedReminder !== 'none' && normalizedReminder !== normalizedStatus) {
+    const label = reminderLabels[normalizedReminder];
+    if (label) parts.push(label);
+  }
+
+  return parts.join(' + ') || 'Unknown';
+}
+
 export function reminderStatusClass(rs) {
   if (rs === 'completed') return 'badge-completed';
   if (rs === 'overdue' || rs === 'no-action') return 'badge-overdue';
-  if (rs === 'upcoming') return 'badge-draft';
+  if (rs === 'upcoming') return 'badge-upcoming';
   return 'badge-neutral';
 }
 

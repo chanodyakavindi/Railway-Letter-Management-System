@@ -37,22 +37,52 @@
 }
 
 .status-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   padding: 3px 10px;
   border-radius: 4px;
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .badge-draft { background: var(--c-warning-bg, var(--color-draft-soft)); color: var(--c-warning, var(--color-draft)); border: 1px solid rgba(180, 83, 9, 0.35); }
 .badge-completed { background: var(--c-success-bg, var(--color-success-soft)); color: var(--c-success, var(--color-success)); border: 1px solid rgba(14, 116, 144, 0.35); }
 .badge-overdue, .badge-noaction { background: var(--c-danger-bg, var(--color-pending-soft)); color: var(--c-danger, var(--color-pending)); border: 1px solid rgba(190, 18, 60, 0.35); }
 .badge-pending, .badge-neutral { background: var(--c-info-bg, var(--color-upcoming-soft)); color: var(--c-info, var(--railway-blue)); border: 1px solid rgba(29, 78, 216, 0.35); }
+.badge-upcoming { background: var(--c-info-bg, var(--color-upcoming-soft)); color: var(--c-info, var(--railway-blue)); border: 1px solid rgba(29, 78, 216, 0.35); }
+
+.status-badge.badge-completed.badge-overdue,
+.status-badge.badge-overdue.badge-completed {
+  background: linear-gradient(135deg, var(--c-success-bg, var(--color-success-soft)) 0%, var(--c-danger-bg, var(--color-pending-soft)) 100%);
+  color: var(--c-danger, var(--color-pending));
+  border-color: rgba(190, 18, 60, 0.35);
+}
+
+.status-badge.badge-completed.badge-upcoming,
+.status-badge.badge-upcoming.badge-completed {
+  background: linear-gradient(135deg, var(--c-success-bg, var(--color-success-soft)) 0%, var(--c-info-bg, var(--color-upcoming-soft)) 100%);
+  color: var(--c-info, var(--railway-blue));
+  border-color: rgba(29, 78, 216, 0.35);
+}
 
 .row-status-draft { background: var(--c-warning-bg, rgba(217, 119, 6, 0.06)); }
 .row-status-completed { background: var(--c-success-bg, rgba(2, 132, 199, 0.06)); }
 .row-status-overdue, .row-status-noaction { background: var(--c-danger-bg, rgba(225, 29, 72, 0.06)); }
+.row-status-reminder-upcoming { background: var(--c-info-bg, rgba(59, 130, 246, 0.08)) !important; }
+.row-status-reminder-overdue { background: var(--c-danger-bg, rgba(225, 29, 72, 0.08)) !important; }
+
+.data-table tr.row-status-completed.row-status-reminder-overdue td,
+.data-table tr.row-status-reminder-overdue.row-status-completed td {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(225, 29, 72, 0.12) 100%) !important;
+}
+
+.data-table tr.row-status-completed.row-status-reminder-upcoming td,
+.data-table tr.row-status-reminder-upcoming.row-status-completed td {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.08) 0%, rgba(59, 130, 246, 0.12) 100%) !important;
+}
 
 .header-actions-row {
   display: flex;
