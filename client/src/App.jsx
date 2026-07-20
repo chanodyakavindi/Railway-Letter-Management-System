@@ -7,7 +7,6 @@ import AppLayout from './layouts/AppLayout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import AddLetterFullPage from './pages/AddLetterFullPage';
-import AddLetterQuickPage from './pages/AddLetterQuickPage';
 import AllLettersPage from './pages/AllLettersPage';
 import ActionTrackingPage from './pages/ActionTrackingPage';
 import RemindersPage from './pages/RemindersPage';
@@ -42,7 +41,6 @@ export default function App() {
               <Route index element={<HomeRedirect />} />
               <Route path="dashboard" element={<RoleRoute roles={['head', 'officer']}><DashboardPage /></RoleRoute>} />
               <Route path="add-letter" element={<RoleRoute roles={['officer']}><AddLetterFullPage /></RoleRoute>} />
-              <Route path="add-letter-quick" element={<RoleRoute roles={['officer']}><AddLetterQuickPage /></RoleRoute>} />
               <Route path="letters" element={<RoleRoute roles={['head', 'officer']}><AllLettersPage /></RoleRoute>} />
               <Route path="action-tracking" element={<RoleRoute roles={['head', 'officer']}><ActionTrackingPage /></RoleRoute>} />
               <Route path="reminders" element={<RoleRoute roles={['head', 'officer']}><RemindersPage /></RoleRoute>} />

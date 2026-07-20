@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard / පුවරුව', roles: ['head', 'officer', 'secretary'] },
   { to: '/add-letter', label: 'Add Letter / ලිපියක් එක් කරන්න', roles: ['officer'] },
-  { to: '/add-letter-quick', label: 'Add Letter Option 2 / දෙවන ක්‍රමය', roles: ['officer'] },
   { to: '/letters', label: 'All Letters / සියලු ලිපි', roles: ['head', 'officer'] },
   { to: '/secretary-inbox', label: 'Secretary Inbox / ලේකම් එන ලිපි', roles: ['secretary'] },
   { to: '/reminders', label: 'Reminders / මතක් කිරීම්', roles: ['head', 'officer'] },

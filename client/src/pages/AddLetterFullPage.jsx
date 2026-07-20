@@ -42,6 +42,7 @@ export default function AddLetterFullPage() {
   const [activeTab, setActiveTab] = useState("add");
 
   const [incomingFile, setIncomingFile] = useState(null);
+  const [incomingScanFile, setIncomingScanFile] = useState(null);
   const [replyFile, setReplyFile] = useState(null);
 
   /* ===================================================================
@@ -168,7 +169,7 @@ const [replyForm, setReplyForm] = useState({
       const payload = activeTab === 'add'
         ? { ...incomingForm, status: asDraft ? 'Draft' : 'Completed' }
         : { ...replyForm, status: asDraft ? 'Draft' : 'Completed' };
-      const fileToUpload = activeTab === 'reply' ? replyFile : incomingFile;
+      const fileToUpload = activeTab === 'reply' ? replyFile : (incomingScanFile || incomingFile);
       const fd = buildLetterFormData(payload, fileToUpload);
       if (editId) {
         await lettersApi.update(editId, fd);
@@ -333,6 +334,14 @@ const [replyForm, setReplyForm] = useState({
                 <div className="file-uploader-box">
                   <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => setIncomingFile(e.target.files[0])} />
                   {incomingFile && <span className="pdf-name">{incomingFile.name}</span>}
+                </div>
+              </div>
+
+              <div className="form-field-group field-span-full">
+                <label className="bilingual-label"><span className="eng-lbl">Scan Upload</span></label>
+                <div className="file-uploader-box">
+                  <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" onChange={(e) => setIncomingScanFile(e.target.files[0])} />
+                  {incomingScanFile && <span className="pdf-name">{incomingScanFile.name}</span>}
                 </div>
               </div>
             </div>
