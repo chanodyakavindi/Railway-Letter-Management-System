@@ -296,6 +296,12 @@ exports.updateReminder = async (req, res, next) => {
       notes: req.body.notes || '',
       changedBy: req.user._id,
     });
+
+    // Re-scheduling an incomplete letter means work is pending again.
+    if (letter.status !== 'Completed' && letter.status !== 'NoAction') {
+      letter.status = 'Pending';
+    }
+
     letter.updatedBy = req.user._id;
     syncLetterOverdueStatus(letter);
     await letter.save();

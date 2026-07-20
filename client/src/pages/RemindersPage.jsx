@@ -43,7 +43,17 @@ export default function RemindersPage() {
     }
   };
 
-  const ReminderTable = ({ items, showOverdue }) => (
+  const completeLetter = async (id) => {
+    try {
+      await lettersApi.updateStatus(id, { status: 'Completed' });
+      showToast('Letter marked completed');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Failed', 'error');
+    }
+  };
+
+  const ReminderTable = ({ items, showOverdue, allowComplete = false }) => (
     <table className="data-table reminder-table">
       <thead>
         <tr>
@@ -66,9 +76,14 @@ export default function RemindersPage() {
             <td>{formatDate(l.reminderDate)}</td>
             {showOverdue && <td>{l.reminderStatus === 'overdue' ? 'Yes' : 'No'}</td>}
             <td>
-              {hasRole('officer') && (
-                <button type="button" className="btn btn-outline btn-sm" onClick={() => openEdit(l)}>Edit</button>
-              )}
+              <div className="actions-cell">
+                {hasRole('officer') && (
+                  <button type="button" className="btn btn-outline btn-sm" onClick={() => openEdit(l)}>Edit</button>
+                )}
+                {allowComplete && hasRole('officer') && l.status !== 'Completed' && l.status !== 'NoAction' && (
+                  <button type="button" className="btn btn-primary btn-sm" onClick={() => completeLetter(l._id)}>Complete</button>
+                )}
+              </div>
             </td>
           </tr>
         ))}
@@ -94,7 +109,7 @@ export default function RemindersPage() {
               <h3>Active Reminders ({data.active.length})</h3>
             </div>
             <div className="card" style={{ marginBottom: 24 }}>
-              {data.active.length === 0 ? <EmptyState title="No active reminders" /> : <ReminderTable items={data.active} showOverdue />}
+              {data.active.length === 0 ? <EmptyState title="No active reminders" /> : <ReminderTable items={data.active} showOverdue allowComplete />}
             </div>
 
             <div className="reminder-section-header completed-section-header">

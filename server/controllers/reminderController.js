@@ -27,7 +27,12 @@ exports.getReminders = async (req, res, next) => {
 
     letters.forEach((l) => {
       const rs = computeReminderStatus(l);
-      const item = { ...l.toObject(), reminderStatus: rs };
+      const item = {
+        ...l.toObject(),
+        // In reminders view, any active/incomplete letter is treated as pending work.
+        status: (l.status === 'Completed' || l.status === 'NoAction') ? l.status : 'Pending',
+        reminderStatus: rs,
+      };
       if (l.status === 'Completed') completed.push(item);
       else if (l.status === 'NoAction') noAction.push(item);
       else if (rs === 'overdue') active.push({ ...item, reminderStatus: 'overdue' });
