@@ -2,22 +2,121 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
-import StatusBadge from '../components/StatusBadge';
-import LetterDetailsModal from '../components/LetterDetailsModal';
 import { useAuth } from '../context/AuthContext';
 import { dashboardApi, usersApi } from '../api';
-import { formatDate } from '../utils/helpers';
+
+function buildPeriodChartData(periodStats) {
+  return [
+    {
+      label: 'Daily',
+      draft: periodStats?.daily?.draft || 0,
+      completed: periodStats?.daily?.completed || 0,
+    },
+    {
+      label: 'Weekly',
+      draft: periodStats?.weekly?.draft || 0,
+      completed: periodStats?.weekly?.completed || 0,
+    },
+    {
+      label: 'Monthly',
+      draft: periodStats?.monthly?.draft || 0,
+      completed: periodStats?.monthly?.completed || 0,
+    },
+  ];
+}
+
+function shortenLabel(value = '') {
+  if (value.length <= 12) return value;
+  return `${value.slice(0, 10)}..`;
+}
+
+function GroupedBarChart({
+  data,
+  leftKey,
+  rightKey,
+  leftLabel,
+  rightLabel,
+  emptyText,
+}) {
+  const chartWidth = 1000;
+  const chartHeight = 320;
+  const margin = { top: 20, right: 20, bottom: 58, left: 40 };
+  const plotWidth = chartWidth - margin.left - margin.right;
+  const plotHeight = chartHeight - margin.top - margin.bottom;
+  const rows = data?.length || 0;
+  const maxValue = Math.max(
+    1,
+    ...((data || []).map((row) => Math.max(row[leftKey] || 0, row[rightKey] || 0)))
+  );
+
+  if (!rows) {
+    return <div className="chart-empty">{emptyText}</div>;
+  }
+
+  const groupWidth = plotWidth / rows;
+  const barWidth = Math.max(14, Math.min(30, groupWidth * 0.24));
+  const gridLines = 5;
+
+  return (
+    <>
+      <div className="chart-legend-inline">
+        <span className="legend-item"><span className="legend-swatch legend-draft" />{leftLabel}</span>
+        <span className="legend-item"><span className="legend-swatch legend-completed" />{rightLabel}</span>
+      </div>
+      <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="svg-chart-svg" role="img" aria-label={`${leftLabel} and ${rightLabel} bar chart`}>
+        {Array.from({ length: gridLines + 1 }).map((_, idx) => {
+          const y = margin.top + (plotHeight * idx) / gridLines;
+          return (
+            <line
+              key={`grid-${idx}`}
+              className="chart-grid-line"
+              x1={margin.left}
+              y1={y}
+              x2={chartWidth - margin.right}
+              y2={y}
+            />
+          );
+        })}
+
+        <line className="chart-axis-line" x1={margin.left} y1={margin.top + plotHeight} x2={chartWidth - margin.right} y2={margin.top + plotHeight} />
+        <line className="chart-axis-line" x1={margin.left} y1={margin.top} x2={margin.left} y2={margin.top + plotHeight} />
+
+        {data.map((row, index) => {
+          const groupStartX = margin.left + index * groupWidth;
+          const centerX = groupStartX + groupWidth / 2;
+          const leftValue = row[leftKey] || 0;
+          const rightValue = row[rightKey] || 0;
+          const leftHeight = (leftValue / maxValue) * plotHeight;
+          const rightHeight = (rightValue / maxValue) * plotHeight;
+          const leftX = centerX - barWidth - 3;
+          const rightX = centerX + 3;
+          const leftY = margin.top + (plotHeight - leftHeight);
+          const rightY = margin.top + (plotHeight - rightHeight);
+
+          return (
+            <g key={`group-${row.label}-${index}`}>
+              <rect className="chart-bar-draft" x={leftX} y={leftY} width={barWidth} height={leftHeight} rx="4" />
+              <rect className="chart-bar-completed" x={rightX} y={rightY} width={barWidth} height={rightHeight} rx="4" />
+              <text className="chart-axis-text" x={leftX + barWidth / 2} y={Math.max(12, leftY - 6)} textAnchor="middle">{leftValue}</text>
+              <text className="chart-axis-text" x={rightX + barWidth / 2} y={Math.max(12, rightY - 6)} textAnchor="middle">{rightValue}</text>
+              <text className="chart-axis-text" x={centerX} y={margin.top + plotHeight + 18} textAnchor="middle">{shortenLabel(row.label)}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </>
+  );
+}
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [period, setPeriod] = useState('daily');
   const [stats, setStats] = useState(null);
-  const [recent, setRecent] = useState([]);
   const [summary, setSummary] = useState(null);
   const [tracking, setTracking] = useState([]);
+  const [periodStats, setPeriodStats] = useState({ daily: null, weekly: null, monthly: null });
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
 
   const navigateToLetters = (status = '') => {
     const query = status ? `?status=${encodeURIComponent(status)}` : '';
@@ -40,23 +139,18 @@ export default function DashboardPage() {
       dashboardApi.stats(period),
       dashboardApi.recent(),
       dashboardApi.dailySummary(),
+      dashboardApi.stats('daily'),
+      dashboardApi.stats('weekly'),
+      dashboardApi.stats('monthly'),
     ])
-      .then(([s, r, d]) => {
+      .then(([s, _r, d, daily, weekly, monthly]) => {
         setStats(s.data);
-        // Defensive: ensure `recent` is always an array before using .map
-        if (!r || !r.data) {
-          console.warn('dashboard.recent returned empty response', r);
-          setRecent([]);
-        } else if (Array.isArray(r.data)) {
-          setRecent(r.data);
-        } else if (typeof r.data === 'object' && r.data.items && Array.isArray(r.data.items)) {
-          // Support alternative response shape { items: [...] }
-          setRecent(r.data.items);
-        } else {
-          console.warn('dashboard.recent returned unexpected shape:', r.data);
-          setRecent([]);
-        }
         setSummary(d.data);
+        setPeriodStats({
+          daily: daily.data,
+          weekly: weekly.data,
+          monthly: monthly.data,
+        });
       })
       .catch((err) => {
         console.error('Dashboard load failed', err);
@@ -81,6 +175,18 @@ export default function DashboardPage() {
       </>
     );
   }
+
+  const letterStatusChartData = buildPeriodChartData(periodStats);
+  const staffActivityChartData = [...tracking]
+    .map((t) => ({
+      id: t.user._id,
+      label: t.user.fullName,
+      draft: t.stats?.draft || 0,
+      completed: t.stats?.completed || 0,
+      total: (t.stats?.draft || 0) + (t.stats?.completed || 0),
+    }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 8);
 
   return (
     <>
@@ -174,6 +280,42 @@ export default function DashboardPage() {
             <Link to="/export" className="btn btn-outline btn-sm">Export Report</Link>
           </div>
 
+          <div className="dashboard-charts-grid">
+            <div className="card chart-card">
+              <div className="card-header">
+                <h3>Letter Status</h3>
+              </div>
+              <div className="svg-chart-container">
+                <GroupedBarChart
+                  data={letterStatusChartData}
+                  leftKey="draft"
+                  rightKey="completed"
+                  leftLabel="Draft"
+                  rightLabel="Completed"
+                  emptyText="No letter status data available"
+                />
+              </div>
+              <div className="chart-caption">Draft vs completed counts by dashboard periods.</div>
+            </div>
+
+            <div className="card chart-card">
+              <div className="card-header">
+                <h3>Staff Activity (8am-5pm)</h3>
+              </div>
+              <div className="svg-chart-container">
+                <GroupedBarChart
+                  data={staffActivityChartData}
+                  leftKey="draft"
+                  rightKey="completed"
+                  leftLabel="Draft"
+                  rightLabel="Completed"
+                  emptyText="No staff activity data available"
+                />
+              </div>
+              <div className="chart-caption">Top 8 staff based on draft + completed letters.</div>
+            </div>
+          </div>
+
           {summary && (
             <div className="card" style={{ marginBottom: 20 }}>
               <div className="card-header">
@@ -189,73 +331,8 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {tracking.length > 0 && (
-            <div className="card" style={{ marginBottom: 20 }}>
-              <div className="card-header">
-                <h3>User Activity / පරිශීලක ක්‍රියාකාරීත්වය</h3>
-              </div>
-              <div className="user-bar-chart">
-                {tracking.map((t) => {
-                  const totalCount = t.stats.completed + t.stats.draft + t.stats.pending + t.stats.overdue;
-                  const maxCount = Math.max(1, stats?.total || totalCount);
-                  const width = Math.min(100, Math.round((totalCount / maxCount) * 100));
-                  return (
-                    <div
-                      key={t.user._id}
-                      className="user-bar-row"
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => navigateToUserTracking(t.user._id)}
-                      onKeyDown={keyboardClick(() => navigateToUserTracking(t.user._id))}
-                    >
-                      <span className="user-bar-label">{t.user.fullName}</span>
-                      <span className="user-bar-visual">
-                        <span className="user-bar-fill" style={{ width: `${width}%` }} />
-                      </span>
-                      <span className="user-bar-value">{totalCount}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          <div className="card">
-            <div className="card-header">
-              <h3>Recent Correspondences / මෑත ලිපි</h3>
-            </div>
-            <div className="table-scroll-container">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Ref ID</th>
-                    <th>Date</th>
-                    <th>Organization</th>
-                    <th>Subject</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recent.map((l) => (
-                    <tr key={l._id}>
-                      <td>{l.letterId}</td>
-                      <td>{formatDate(l.dateReceived)}</td>
-                      <td>{l.referredEntity}</td>
-                      <td>{l.title}</td>
-                      <td><StatusBadge status={l.status} /></td>
-                      <td>
-                        <button type="button" className="btn btn-outline btn-sm" onClick={() => setSelected(l)}>View</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
         </section>
       </div>
-      <LetterDetailsModal letter={selected} open={!!selected} onClose={() => setSelected(null)} />
     </>
   );
 }
