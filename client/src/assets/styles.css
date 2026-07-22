@@ -47,30 +47,32 @@
 
 /* --- Dark Theme Variables Override --- */
 .dark-theme {
- --bg-primary: #0b0f19;
- --bg-card: #151c2e;
- --bg-card-alt: #1e2942;
- --border-color: #273554;
- --text-main: #f1f5f9;
- --text-soft: #94a3b8;
- --text-muted: #64748b;
+ --bg-primary: #0a0e14;
+ --bg-card: #1e293b;
+ --bg-card-alt: #0f172a;
+ --bg-input: #0f172a;
+ --bg-hover: rgba(148, 163, 184, 0.08);
+ --border-color: #1e293b;
+ --text-main: #ffffff;
+ --text-soft: #cbd5e1;
+ --text-muted: #94a3b8;
 
- --railway-blue: #38bdf8; /* Sky Blue in dark theme */
- --railway-gold: #f59e0b; /* Gold/Yellow in dark theme */
- --railway-gold-hover: #d97706;
- --railway-gold-soft: rgba(245, 158, 11, 0.12);
+ --railway-blue: #3b82f6;
+ --railway-gold: #ff9933;
+ --railway-gold-hover: #f59e0b;
+ --railway-gold-soft: rgba(255, 153, 51, 0.12);
 
- --color-success: #60a5fa; /* Light blue in dark theme */
- --color-success-soft: rgba(96, 165, 250, 0.12);
- --color-pending: #fb7185; /* Red in dark theme */
- --color-pending-soft: rgba(251, 113, 133, 0.12);
- --color-draft: #f59e0b; /* Yellow in dark theme */
- --color-draft-soft: rgba(245, 158, 11, 0.12);
- --color-upcoming-soft: rgba(56, 189, 248, 0.12);
+ --color-success: #38bdf8;
+ --color-success-soft: rgba(56, 189, 248, 0.12);
+ --color-pending: #ef4444;
+ --color-pending-soft: rgba(239, 68, 68, 0.12);
+ --color-draft: #ff9933;
+ --color-draft-soft: rgba(255, 153, 51, 0.12);
+ --color-upcoming-soft: rgba(59, 130, 246, 0.12);
 
- --shadow-sm: 0 2px 4px 0 rgba(0, 0, 0, 0.15);
- --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.3);
- --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.5);
+ --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+ --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.4);
+ --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.45);
 }
 
 /* --- Base Resets --- */
@@ -394,12 +396,12 @@ input, select, textarea, button {
  padding: 24px 20px;
  display: flex;
  align-items: center;
- gap: 12px;
+ gap: 8px;
  border-bottom: 1px solid var(--border-color);
 }
 
 .brand-icon {
- font-size: 28px;
+ font-size: 30px;
 }
 
 .brand-texts {
@@ -409,14 +411,14 @@ input, select, textarea, button {
 
 .brand-main {
  font-family: var(--font-display);
- font-size: 13px;
+ font-size: 16px;
  font-weight: 800;
- letter-spacing: 1px;
+ letter-spacing: 0.5px;
  color: var(--text-main);
 }
 
 .brand-sub {
- font-size: 9px;
+ font-size: 10px;
  color: var(--text-soft);
  font-weight: 600;
  text-transform: uppercase;
@@ -2878,8 +2880,9 @@ body.lang-si #ai-form-title-english {
   border-color: var(--railway-blue, #2563eb);
 }
 .dark-theme .multiselect-select-box {
-  background-color: var(--bg-input, #1e293b);
-  border-color: var(--border-color, #334155);
+  background-color: var(--bg-input);
+  border-color: #334155;
+  color: var(--text-main);
 }
 .multiselect-options-panel {
   position: absolute;
@@ -2898,9 +2901,9 @@ body.lang-si #ai-form-title-english {
   box-sizing: border-box;
 }
 .dark-theme .multiselect-options-panel {
-  background-color: var(--bg-card, #1e293b);
-  border-color: var(--border-color, #334155);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  background-color: var(--bg-card);
+  border-color: #334155;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45), 0 8px 10px -6px rgba(0, 0, 0, 0.35);
 }
 .multiselect-option {
   display: flex;
@@ -2917,7 +2920,7 @@ body.lang-si #ai-form-title-english {
   background-color: var(--bg-hover, #f1f5f9);
 }
 .dark-theme .multiselect-option:hover {
-  background-color: var(--bg-hover, #334155);
+  background-color: var(--bg-hover);
 }
 .multiselect-option input[type="checkbox"] {
   width: 16px;

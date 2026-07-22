@@ -11,9 +11,16 @@ export default function Header({ title, search, onSearch }) {
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
-    const tick = () => setClock(new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }));
+    const tick = () => {
+      setClock(new Date().toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      }));
+    };
     tick();
-    const id = setInterval(tick, 60000);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -26,11 +33,10 @@ export default function Header({ title, search, onSearch }) {
   return (
     <header className="workspace-header">
       <div className="header-breadcrumbs">
-        <span className="breadcrumb-separator">/</span>
         <span className="active">{pick(title)}</span>
       </div>
       <div className="header-actions-row">
-        <div className="btn-group-toggle" style={{ marginRight: 10 }}>
+        <div className="btn-group-toggle header-lang-toggle">
           <button
             type="button"
             className={`btn btn-outline btn-sm ${lang === 'en' ? 'active' : ''}`}
@@ -57,13 +63,40 @@ export default function Header({ title, search, onSearch }) {
             />
           </div>
         )}
-        <Link to="/notifications" className="notif-btn">
-          🔔
+        <Link to="/notifications" className="notif-btn" aria-label="Notifications">
+          <svg className="notif-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10 20a2 2 0 0 0 4 0"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+            />
+          </svg>
           {unread > 0 && <span className="notif-badge">{unread}</span>}
         </Link>
         <Link to="/history" className="btn btn-outline btn-sm">{t('History', 'ඉතිහාසය')}</Link>
-        <span className="live-clock">{clock}</span>
-        <span className="header-user">{user?.fullName}</span>
+        <time className="live-clock" dateTime={clock}>{clock}</time>
+        <span className="header-profile-icon" aria-label={user?.fullName}>
+          <svg className="profile-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" strokeWidth="1.75" />
+            <path
+              d="M5.5 19.5c.8-2.8 3.4-4.5 6.5-4.5s5.7 1.7 6.5 4.5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+            />
+          </svg>
+        </span>
       </div>
     </header>
   );

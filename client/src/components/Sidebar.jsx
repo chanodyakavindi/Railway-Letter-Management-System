@@ -42,7 +42,7 @@ export default function Sidebar({ reminderCount, onLogout }) {
       <div className="sidebar-brand">
         <div className="brand-icon">🚂</div>
         <div className="brand-texts">
-          <span className="brand-main">{t('Railway Letter Monitoring System', 'දුම්රිය ලිපි අධීක්ෂණ පද්ධතිය')}</span>
+          <span className="brand-main">RAILWAY LETTER MANAGEMENT<br />SYSTEM</span>
         </div>
       </div>
 
@@ -51,7 +51,6 @@ export default function Sidebar({ reminderCount, onLogout }) {
         <div className="user-details">
           <div className="user-name-display">{user?.fullName}</div>
           <div className="user-role-display">{roleLabel}</div>
-          <div className="user-access-pill">{user?.username}</div>
         </div>
       </div>
 

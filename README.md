@@ -4,11 +4,10 @@ Full MERN stack application for Sri Lanka Railways correspondence management.
 
 ## Stack
 
-- **Frontend (active):** Original wireframe UI (`legacy-wireframe/`) — HTML/CSS/vanilla JS, served by Express and wired to the live API through `legacy-wireframe/api-bridge.js`
+- **Frontend:** React + Vite (`client/`) — the single frontend for the app
 - **Backend:** Node.js, Express, MongoDB, Mongoose
 - **Auth:** JWT + bcryptjs
 - **Uploads:** Multer (PDF only, 10MB max)
-- **Frontend (legacy/alternate):** A React + Vite client also exists in `client/` but the served UI is the original wireframe
 
 ## Prerequisites
 
@@ -31,14 +30,15 @@ cp server/.env.example server/.env
 # 4. Seed database with demo users and sample letters
 npm run seed
 
-# 5. Start the app (Express serves both the API and the wireframe UI)
-npm start
+# 5. Start backend and frontend (two terminals)
+npm run server    # Terminal 1 — API on http://localhost:5001
+npm run client    # Terminal 2 — React app on http://localhost:5173
 ```
 
-Open **http://localhost:5001**
+Open **http://localhost:5173** for the app. The Vite dev server proxies API
+calls to the backend on port 5001.
 
-The original wireframe UI is served directly by the Express server and talks
-to the real MongoDB-backed API. There is no separate frontend dev server to run.
+Or run both together with one command: `npm run dev`
 
 ## Demo Login Credentials
 
@@ -54,20 +54,26 @@ to the real MongoDB-backed API. There is no separate frontend dev server to run.
 | Command | Description |
 |---------|-------------|
 | `npm run install-all` | Install root, server, and client deps |
-| `npm start` | Run the app: Express API + wireframe UI on :5001 |
-| `npm run server` | Same as `npm start` but with nodemon auto-reload |
+| `npm start` | Run the API only on :5001 |
+| `npm run dev` | Run API + Vite dev server together |
+| `npm run server` | Run the API only with nodemon auto-reload |
+| `npm run client` | Run the React dev server on :5173 |
+| `npm run build` | Build the React client into `client/dist` |
 | `npm run seed` | Reset & seed MongoDB |
-| `npm run dev` | Run API + the alternate React dev server (optional) |
-| `npm run client` | Vite React only (optional alternate UI) |
-| `npm run build` | Build React for production (optional) |
+
+### Editing the frontend
+
+The React app in `client/` is the only frontend. Run `npm run server` and
+`npm run client` in separate terminals (or use `npm run dev` for both). Edit
+files under `client/src/` — changes hot-reload on **http://localhost:5173** and
+API calls are proxied to **http://localhost:5001**.
 
 ## Project Structure
 
 ```
 railway-letter-system/
-├── client/          # React + Vite frontend
+├── client/          # React + Vite frontend (the single frontend)
 ├── server/          # Express API + MongoDB
-├── legacy-wireframe/  # Original static wireframe (preserved)
 ├── package.json     # Root scripts
 └── README.md
 ```
@@ -83,11 +89,11 @@ railway-letter-system/
 - Dashboard stats, daily summary, notifications
 - User tracking, audit history, CSV/PDF export
 - Admin user management
-- **AI letter scanning** — upload a photo/PDF of a handwritten letter (Sinhala or English) and the form fields auto-fill via OpenAI GPT-4o vision (Option 02 page and the main Add Letter form)
+- **AI letter scanning** — upload a photo/PDF of a handwritten letter (Sinhala or English) and the form fields auto-fill via OpenAI GPT-4o vision (Quick Add and the main Add Letter form)
 
 ## AI Letter Scanning Setup
 
-Auto-fill works on both the **Option 02 – AI Letter Scanning** page and the main
+Auto-fill works on the **Quick Add (AI Letter Scanning)** page and the main
 **Add Letter** form. When an officer uploads an image or PDF, the backend sends it
 to OpenAI GPT-4o, which reads the handwriting (Sinhala/English) and returns the
 letter number, date, sender, subject, and file number.
@@ -113,15 +119,13 @@ Development: `http://localhost:5001/api`
 
 Health check: `GET /api/health`
 
-## Wireframe UI (served frontend)
+## Frontend
 
-The original static HTML/CSS/JS wireframe in `legacy-wireframe/` is the UI that
-the system serves. Its look, colours, Sinhala/English labels, pages and
-workflow are unchanged. `legacy-wireframe/api-bridge.js` replaces the old
-`localStorage` demo logic with real REST calls:
+The React app in `client/` is the only frontend. It talks to the backend via
+REST (see `client/src/api/`) with JWT auth:
 
-- Login authenticates against `/api/auth/login` (JWT).
-- Letters, replies, reminders, no-action and user management read/write MongoDB.
+- Login authenticates against `/api/auth/login` (JWT stored in `localStorage`).
+- Letters, replies, reminders, and user management read/write MongoDB.
 - History reads the audit log; secretary inbox is role-scoped by the backend.
 
 ## Notes

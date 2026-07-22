@@ -24,8 +24,7 @@ const aiRoutes = require('./routes/aiRoutes');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// CSP is disabled because the legacy wireframe relies on inline event
-// handlers and inline styles, which a strict Content-Security-Policy blocks.
+// CSP is disabled for API flexibility with cross-origin clients.
 app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginResourcePolicy: { policy: 'cross-origin' },

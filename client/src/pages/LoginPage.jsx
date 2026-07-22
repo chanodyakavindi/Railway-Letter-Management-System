@@ -91,10 +91,10 @@ export default function LoginPage() {
   const group = ROLE_GROUPS[activeRole];
 
   return (
-    <div id="login-screen" className="screen active">
+    <div id="login-screen" className="screen active login-page">
       <div className="login-background-overlay" />
       <div className="login-card-container">
-        <div className="btn-group-toggle" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+        <div className="btn-group-toggle login-lang-toggle">
           <button
             type="button"
             className={`btn btn-outline btn-sm ${lang === 'en' ? 'active' : ''}`}
@@ -111,9 +111,8 @@ export default function LoginPage() {
           </button>
         </div>
         <div className="login-header">
-          <div className="railway-emblem">🚂</div>
           <h1 className="login-title">ලංකා දුම්රිය දෙපාර්තමේන්තුව</h1>
-          <h2 className="login-subtitle">Sri Lanka Railways</h2>
+          <h2 className="login-subtitle">SRI LANKA RAILWAYS</h2>
           <div className="login-divider" />
           <p className="login-app-name">{t('Letter Management System (RLMS)', 'ලිපි කළමනාකරණ පද්ධතිය (RLMS)')}</p>
         </div>
@@ -121,7 +120,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit}>
           <div className="login-role-selection">
             <label className="field-label">
-              {pick('Select Identity to Sign In / පුරනය වීමට අනන්‍යතාවය තෝරන්‍න')}
+              {pick('SELECT IDENTITY TO SIGN IN / පුරනය වීමට අනන්‍යතාවය තෝරන්‍න')}
             </label>
 
             <div className="identity-group-tabs">
@@ -132,7 +131,7 @@ export default function LoginPage() {
                   className={`role-tab ${activeRole === role ? 'active' : ''}`}
                   onClick={() => switchLoginGroup(role)}
                 >
-                  {ROLE_GROUPS[role].tab}
+                  {pick(ROLE_GROUPS[role].tab)}
                 </button>
               ))}
             </div>
@@ -143,16 +142,14 @@ export default function LoginPage() {
                   <option key={u.username} value={u.username}>{u.label}</option>
                 ))}
               </select>
-              <span className={`role-badge ${group.badgeClass}`}>{group.badge}</span>
             </div>
           </div>
 
           <div className="form-field password-field">
             <label className="field-label" htmlFor="password-input">
-              {pick('Credentials / මුරපදය')} (Auto-filled)
+              {pick('SIMULATED CREDENTIALS / මුරපදය')}
             </label>
             <div className="input-wrapper">
-              <span className="input-icon" />
               <input
                 id="password-input"
                 type="password"

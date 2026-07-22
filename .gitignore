@@ -7,5 +7,4 @@ server/uploads/*
 !server/uploads/.gitkeep
 .DS_Store
 *.log
-legacy-wireframe/node_modules/
 public/
