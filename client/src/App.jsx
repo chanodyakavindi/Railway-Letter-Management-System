@@ -17,6 +17,7 @@ import UserManagementPage from './pages/UserManagementPage';
 import SecretaryInboxPage from './pages/SecretaryInboxPage';
 import NotificationsPage from './pages/NotificationsPage';
 import Loading from './components/Loading';
+import { LanguageProvider } from './context/LanguageContext';
 import './assets/styles.css';
 import './assets/polish.css';
 import './assets/app-overrides.css';
@@ -32,29 +33,31 @@ function HomeRedirect() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-              <Route index element={<HomeRedirect />} />
-              <Route path="dashboard" element={<RoleRoute roles={['head', 'officer']}><DashboardPage /></RoleRoute>} />
-              <Route path="add-letter" element={<RoleRoute roles={['officer']}><AddLetterFullPage /></RoleRoute>} />
-              <Route path="letters" element={<RoleRoute roles={['head', 'officer']}><AllLettersPage /></RoleRoute>} />
-              <Route path="action-tracking" element={<RoleRoute roles={['head', 'officer']}><ActionTrackingPage /></RoleRoute>} />
-              <Route path="reminders" element={<RoleRoute roles={['head', 'officer']}><RemindersPage /></RoleRoute>} />
-              <Route path="user-tracking" element={<RoleRoute roles={['head', 'admin']}><UserTrackingPage /></RoleRoute>} />
-              <Route path="history" element={<RoleRoute roles={['head', 'officer']}><HistoryPage /></RoleRoute>} />
-              <Route path="export" element={<RoleRoute roles={['head', 'officer']}><ExportReportPage /></RoleRoute>} />
-              <Route path="users" element={<RoleRoute roles={['admin']}><UserManagementPage /></RoleRoute>} />
-              <Route path="secretary-inbox" element={<RoleRoute roles={['secretary']}><SecretaryInboxPage /></RoleRoute>} />
-              <Route path="notifications" element={<RoleRoute roles={['head', 'officer', 'secretary']}><NotificationsPage /></RoleRoute>} />
-            </Route>
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </ToastProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+                <Route index element={<HomeRedirect />} />
+                <Route path="dashboard" element={<RoleRoute roles={['head', 'officer']}><DashboardPage /></RoleRoute>} />
+                <Route path="add-letter" element={<RoleRoute roles={['officer']}><AddLetterFullPage /></RoleRoute>} />
+                <Route path="letters" element={<RoleRoute roles={['head', 'officer']}><AllLettersPage /></RoleRoute>} />
+                <Route path="action-tracking" element={<RoleRoute roles={['head', 'officer']}><ActionTrackingPage /></RoleRoute>} />
+                <Route path="reminders" element={<RoleRoute roles={['head', 'officer']}><RemindersPage /></RoleRoute>} />
+                <Route path="user-tracking" element={<RoleRoute roles={['head', 'admin']}><UserTrackingPage /></RoleRoute>} />
+                <Route path="history" element={<RoleRoute roles={['head', 'officer']}><HistoryPage /></RoleRoute>} />
+                <Route path="export" element={<RoleRoute roles={['head', 'officer']}><ExportReportPage /></RoleRoute>} />
+                <Route path="users" element={<RoleRoute roles={['admin']}><UserManagementPage /></RoleRoute>} />
+                <Route path="secretary-inbox" element={<RoleRoute roles={['secretary']}><SecretaryInboxPage /></RoleRoute>} />
+                <Route path="notifications" element={<RoleRoute roles={['head', 'officer', 'secretary']}><NotificationsPage /></RoleRoute>} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </ToastProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

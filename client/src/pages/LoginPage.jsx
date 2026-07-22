@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const DEFAULT_PASSWORD = 'Password@123';
 
 const ROLE_GROUPS = {
   officer: {
-    tab: 'Department Officer',
-    badge: 'Create/Edit Access (No Delete)',
+    tab: 'Department Officer / දෙපාර්තමේන්තු නිලධාරී',
+    badge: 'Create/Edit Access (No Delete) / නිර්මාණය හා සංස්කරණය (මකා දැමීම නැත)',
     badgeClass: 'badge-officer',
     users: [
       { username: 'priyangani', label: '151 — Priyangani (Officer)' },
@@ -23,16 +24,16 @@ const ROLE_GROUPS = {
     ],
   },
   head: {
-    tab: 'Head of Department',
-    badge: 'View-only (All Letters & Dashboards)',
+    tab: 'Head of Department / දෙපාර්තමේන්තු ප්‍රධානියා',
+    badge: 'View-only (All Letters & Dashboards) / බැලීම පමණි (සියලු ලිපි හා පුවරු)',
     badgeClass: 'badge-head',
     users: [
       { username: 'hod', label: '152 — Head of Department' },
     ],
   },
   secretary: {
-    tab: 'Addl. Secretary',
-    badge: 'Category-Specific View & Reply Only',
+    tab: 'Addl. Secretary / අතිරේක ලේකම්',
+    badge: 'Category-Specific View & Reply Only / කාණ්ඩයට සීමිත බැලීම හා පිළිතුරු පමණි',
     badgeClass: 'badge-secretary',
     users: [
       { username: 'sec-admin', label: 'Addl. Sec. (Administration)' },
@@ -44,8 +45,8 @@ const ROLE_GROUPS = {
     ],
   },
   admin: {
-    tab: 'System Admin',
-    badge: 'User Administration Only',
+    tab: 'System Admin / පද්ධති පරිපාලක',
+    badge: 'User Administration Only / පරිශීලක පරිපාලනය පමණි',
     badgeClass: 'badge-admin',
     users: [
       { username: 'admin', label: 'admin — System Admin' },
@@ -62,6 +63,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const { showToast } = useToast();
+  const { lang, setLang, pick, t } = useLanguage();
   const navigate = useNavigate();
 
   const switchLoginGroup = (role) => {
@@ -92,18 +94,34 @@ export default function LoginPage() {
     <div id="login-screen" className="screen active">
       <div className="login-background-overlay" />
       <div className="login-card-container">
+        <div className="btn-group-toggle" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+          <button
+            type="button"
+            className={`btn btn-outline btn-sm ${lang === 'en' ? 'active' : ''}`}
+            onClick={() => setLang('en')}
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            className={`btn btn-outline btn-sm ${lang === 'si' ? 'active' : ''}`}
+            onClick={() => setLang('si')}
+          >
+            SI
+          </button>
+        </div>
         <div className="login-header">
           <div className="railway-emblem">🚂</div>
-          <h1 className="login-title">ලංකා දුම්‍රිය දෙපාර්‍තමේන්‍තුව</h1>
+          <h1 className="login-title">ලංකා දුම්රිය දෙපාර්තමේන්තුව</h1>
           <h2 className="login-subtitle">Sri Lanka Railways</h2>
           <div className="login-divider" />
-          <p className="login-app-name">Letter Management System (RLMS)</p>
+          <p className="login-app-name">{t('Letter Management System (RLMS)', 'ලිපි කළමනාකරණ පද්ධතිය (RLMS)')}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="login-role-selection">
             <label className="field-label">
-              Select Identity to Sign In / පුරනය වීමට අනන්‍යතාවය තෝරන්‍න
+              {pick('Select Identity to Sign In / පුරනය වීමට අනන්‍යතාවය තෝරන්‍න')}
             </label>
 
             <div className="identity-group-tabs">
@@ -131,7 +149,7 @@ export default function LoginPage() {
 
           <div className="form-field password-field">
             <label className="field-label" htmlFor="password-input">
-              Credentials / මුරපදය (Auto-filled)
+              {pick('Credentials / මුරපදය')} (Auto-filled)
             </label>
             <div className="input-wrapper">
               <span className="input-icon" />
@@ -147,13 +165,13 @@ export default function LoginPage() {
           </div>
 
           <button type="submit" className="btn btn-primary btn-full-width" disabled={loading}>
-            <span>{loading ? 'Signing in...' : 'Sign In to System / පද්‍ධතියට පිවිසෙන්‍න'}</span>
+            <span>{loading ? t('Signing in...', 'පුරනය වෙමින්...') : pick('Sign In to System / පද්‍ධතියට පිවිසෙන්‍න')}</span>
             <span className="arrow">→</span>
           </button>
         </form>
 
         <div className="login-footer">
-          <p>Railway LMS Security Gate • Authorized Personnel Only</p>
+          <p>{t('Railway LMS Security Gate • Authorized Personnel Only', 'දුම්රිය LMS ආරක්ෂක දොරටුව • අවසර ලත් පිරිසට පමණි')}</p>
         </div>
       </div>
     </div>

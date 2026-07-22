@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard / පුවරුව', roles: ['head', 'officer', 'secretary'] },
@@ -26,13 +27,14 @@ export default function Sidebar({ reminderCount, onLogout }) {
   const toggleTheme = () => setDark((d) => !d);
 
   const { user, hasRole } = useAuth();
+  const { pick, t } = useLanguage();
   const initial = user?.fullName?.charAt(0) || 'U';
 
   const roleLabel = {
-    admin: 'System Admin',
-    head: 'Head of Department',
-    officer: 'Department Officer',
-    secretary: 'Additional Secretary',
+    admin: t('System Admin', 'පද්ධති පරිපාලක'),
+    head: t('Head of Department', 'දෙපාර්තමේන්තු ප්‍රධානියා'),
+    officer: t('Department Officer', 'දෙපාර්තමේන්තු නිලධාරී'),
+    secretary: t('Additional Secretary', 'අතිරේක ලේකම්'),
   }[user?.role] || user?.role;
 
   return (
@@ -40,7 +42,7 @@ export default function Sidebar({ reminderCount, onLogout }) {
       <div className="sidebar-brand">
         <div className="brand-icon">🚂</div>
         <div className="brand-texts">
-          <span className="brand-main">Railway Letter Monitoring System</span>
+          <span className="brand-main">{t('Railway Letter Monitoring System', 'දුම්රිය ලිපි අධීක්ෂණ පද්ධතිය')}</span>
         </div>
       </div>
 
@@ -60,7 +62,7 @@ export default function Sidebar({ reminderCount, onLogout }) {
             to={item.to}
             className={({ isActive }) => `menu-item ${isActive ? 'active' : ''}`}
           >
-            <span>{item.label}</span>
+            <span>{pick(item.label)}</span>
             {item.to === '/reminders' && reminderCount > 0 && (
               <span className="menu-badge">{reminderCount}</span>
             )}
@@ -71,11 +73,11 @@ export default function Sidebar({ reminderCount, onLogout }) {
       <div className="sidebar-footer">
         <button type="button" className="theme-toggle-btn" onClick={toggleTheme}>
           <span className="theme-icon">{dark ? '🌙' : '☀️'}</span>
-          <span>{dark ? 'Dark Mode' : 'Light Mode'}</span>
+          <span>{dark ? t('Dark Mode', 'අඳුරු ආකාරය') : t('Light Mode', 'ආලෝක ආකාරය')}</span>
         </button>
         <button type="button" className="btn-logout" onClick={onLogout}>
           <span className="logout-icon">↩</span>
-          <span>Sign Out / පිටවීම</span>
+          <span>{t('Sign Out', 'පිටවීම')}</span>
         </button>
       </div>
     </aside>
