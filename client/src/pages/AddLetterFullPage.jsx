@@ -166,9 +166,23 @@ const [replyForm, setReplyForm] = useState({
 
     setSaving(true);
     try {
-      const payload = activeTab === 'add'
-        ? { ...incomingForm, status: asDraft ? 'Draft' : 'Completed' }
-        : { ...replyForm, status: asDraft ? 'Draft' : 'Completed' };
+      let payload;
+      if (activeTab === 'add') {
+        payload = { ...incomingForm, status: asDraft ? 'Draft' : 'Completed', sourceType: 'letter' };
+      } else {
+        const today = new Date().toISOString().split('T')[0];
+        const fallbackTitle = (replyForm.actionTaken || '').trim() || 'Reply Letter';
+        payload = {
+          ...replyForm,
+          // /api/letters create requires title + dateReceived.
+          // Keep reply mode compatible by providing sensible defaults.
+          title: fallbackTitle,
+          dateReceived: incomingForm.dateReceived || today,
+          // Reply-flow items must stay pending until user explicitly completes from Reminders.
+          status: 'Pending',
+          sourceType: 'reply',
+        };
+      }
       const fileToUpload = activeTab === 'reply' ? replyFile : (incomingScanFile || incomingFile);
       const fd = buildLetterFormData(payload, fileToUpload);
       if (editId) {

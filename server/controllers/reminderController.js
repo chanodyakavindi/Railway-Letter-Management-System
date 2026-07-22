@@ -23,23 +23,22 @@ exports.getReminders = async (req, res, next) => {
 
     const active = [];
     const completed = [];
-    const noAction = [];
 
     letters.forEach((l) => {
       const rs = computeReminderStatus(l);
       const item = {
         ...l.toObject(),
-        // In reminders view, any active/incomplete letter is treated as pending work.
-        status: (l.status === 'Completed' || l.status === 'NoAction') ? l.status : 'Pending',
+        // In reminders view, only user-completed items are shown as Completed.
+        // Every other reminder stays Pending until user marks it complete.
+        status: l.status === 'Completed' ? 'Completed' : 'Pending',
         reminderStatus: rs,
       };
       if (l.status === 'Completed') completed.push(item);
-      else if (l.status === 'NoAction') noAction.push(item);
       else if (rs === 'overdue') active.push({ ...item, reminderStatus: 'overdue' });
       else active.push(item);
     });
 
-    res.json({ active, completed, noAction });
+    res.json({ active, completed });
   } catch (err) {
     next(err);
   }
@@ -55,17 +54,14 @@ exports.getSummary = async (req, res, next) => {
     let upcoming = 0;
     let overdue = 0;
     let completed = 0;
-    let noAction = 0;
-
     letters.forEach((l) => {
       const rs = computeReminderStatus(l);
       if (l.status === 'Completed') completed += 1;
-      else if (l.status === 'NoAction') noAction += 1;
       else if (rs === 'overdue') overdue += 1;
       else upcoming += 1;
     });
 
-    res.json({ upcoming, overdue, completed, noAction, total: letters.length });
+    res.json({ upcoming, overdue, completed, noAction: 0, total: letters.length });
   } catch (err) {
     next(err);
   }

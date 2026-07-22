@@ -13,7 +13,7 @@ export default function RemindersPage() {
   const { hasRole } = useAuth();
   const { showToast } = useToast();
   const [period, setPeriod] = useState('all');
-  const [data, setData] = useState({ active: [], completed: [], noAction: [] });
+  const [data, setData] = useState({ active: [], completed: [] });
   const [loading, setLoading] = useState(true);
   const [editLetter, setEditLetter] = useState(null);
   const [reminderDate, setReminderDate] = useState('');
@@ -33,6 +33,10 @@ export default function RemindersPage() {
   };
 
   const saveReminder = async () => {
+    if (!reminderDate) {
+      showToast('Please select a reminder date', 'error');
+      return;
+    }
     try {
       await lettersApi.updateReminder(editLetter._id, { reminderDate, notes });
       showToast('Reminder updated');
@@ -72,7 +76,7 @@ export default function RemindersPage() {
             <td>{l.letterId}</td>
             <td>{l.title}</td>
             <td>{l.referredEntity}</td>
-            <td><StatusBadge status={l.status} reminderStatus={l.reminderStatus} /></td>
+            <td><StatusBadge status={l.status} /></td>
             <td>{formatDate(l.reminderDate)}</td>
             {showOverdue && <td>{l.reminderStatus === 'overdue' ? 'Yes' : 'No'}</td>}
             <td>
@@ -80,7 +84,7 @@ export default function RemindersPage() {
                 {hasRole('officer') && (
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => openEdit(l)}>Edit</button>
                 )}
-                {allowComplete && hasRole('officer') && l.status !== 'Completed' && l.status !== 'NoAction' && (
+                {allowComplete && hasRole('officer') && l.status !== 'Completed' && (
                   <button type="button" className="btn btn-primary btn-sm" onClick={() => completeLetter(l._id)}>Complete</button>
                 )}
               </div>
@@ -106,10 +110,10 @@ export default function RemindersPage() {
         {loading ? <Loading /> : (
           <>
             <div className="reminder-section-header">
-              <h3>Active Reminders ({data.active.length})</h3>
+              <h3>Pending Reminders ({data.active.length})</h3>
             </div>
             <div className="card" style={{ marginBottom: 24 }}>
-              {data.active.length === 0 ? <EmptyState title="No active reminders" /> : <ReminderTable items={data.active} showOverdue allowComplete />}
+              {data.active.length === 0 ? <EmptyState title="No pending reminders" /> : <ReminderTable items={data.active} showOverdue allowComplete />}
             </div>
 
             <div className="reminder-section-header completed-section-header">
@@ -119,12 +123,6 @@ export default function RemindersPage() {
               {data.completed.length === 0 ? <EmptyState title="No completed reminders" /> : <ReminderTable items={data.completed} />}
             </div>
 
-            <div className="reminder-section-header no-action-section-header">
-              <h3>No Action Taken ({data.noAction.length})</h3>
-            </div>
-            <div className="card no-action-reminders-card">
-              {data.noAction.length === 0 ? <EmptyState title="No no-action letters" /> : <ReminderTable items={data.noAction} />}
-            </div>
           </>
         )}
       </div>

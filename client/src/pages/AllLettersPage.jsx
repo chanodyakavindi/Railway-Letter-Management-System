@@ -21,7 +21,7 @@ export default function AllLettersPage() {
 
   const load = () => {
     setLoading(true);
-    lettersApi.list(filters)
+    lettersApi.list({ ...filters, excludeSourceType: 'reply' })
       .then(({ data }) => setLetters(data))
       .finally(() => setLoading(false));
   };

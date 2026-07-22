@@ -69,6 +69,7 @@ const letterSchema = new mongoose.Schema(
     assignedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     assignedCategories: [{ type: String }],
     replies: [replySchema],
+    sourceType: { type: String, enum: ['letter', 'reply'], default: 'letter' },
     entryType: { type: String, enum: ['full', 'quick'], default: 'full' },
   },
   { timestamps: true }

@@ -51,7 +51,7 @@ exports.getCategories = async (_req, res, next) => {
 exports.getLetters = async (req, res, next) => {
   try {
     const {
-      status, search, recipient, createdBy, dateFrom, dateTo, inbox,
+      status, search, recipient, createdBy, dateFrom, dateTo, inbox, excludeSourceType,
     } = req.query;
 
     const filter = buildLetterFilter(req.user, {});
@@ -71,6 +71,9 @@ exports.getLetters = async (req, res, next) => {
     }
     if (search) {
       filter.$text = { $search: search };
+    }
+    if (excludeSourceType) {
+      filter.sourceType = { $ne: excludeSourceType };
     }
     if (inbox === 'secretary' && req.user.role === 'secretary') {
       Object.assign(filter, buildLetterFilter(req.user, {}));
@@ -277,19 +280,17 @@ exports.updateReminder = async (req, res, next) => {
     const letter = await Letter.findById(req.params.id);
     if (!letter) return res.status(404).json({ message: 'Letter not found' });
 
-    if (req.user.role === 'head') {
-      // head can view only
-    } else if (!canEditLetter(req.user, letter) && req.user.role !== 'head') {
-      if (req.user.role !== 'officer') {
-        return res.status(403).json({ message: 'Cannot update reminder' });
-      }
-    }
-
-    if (req.user.role === 'officer' && !canEditLetter(req.user, letter)) {
+    // Route is already officer-only. Any officer who can access reminders can reschedule.
+    if (req.user.role !== 'officer') {
       return res.status(403).json({ message: 'Cannot update reminder' });
     }
 
     const reminderDate = req.body.reminderDate ? new Date(req.body.reminderDate) : null;
+    if (!reminderDate || Number.isNaN(reminderDate.getTime())) {
+      return res.status(400).json({ message: 'Valid reminder date is required' });
+    }
+
+    // Replace the active reminder date on the letter with the newly selected date.
     letter.reminderDate = reminderDate;
     letter.reminderHistory.push({
       reminderDate,
@@ -297,10 +298,8 @@ exports.updateReminder = async (req, res, next) => {
       changedBy: req.user._id,
     });
 
-    // Re-scheduling an incomplete letter means work is pending again.
-    if (letter.status !== 'Completed' && letter.status !== 'NoAction') {
-      letter.status = 'Pending';
-    }
+    // Any re-scheduled reminder is reopened and tracked as pending work until completed.
+    letter.status = 'Pending';
 
     letter.updatedBy = req.user._id;
     syncLetterOverdueStatus(letter);
