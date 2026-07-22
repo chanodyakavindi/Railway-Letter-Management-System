@@ -162,7 +162,7 @@ export default function RemindersPage() {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th>Reminder</th>
                     <th>Reminder Date</th>
                     <th>Updated At</th>
                     <th>Notes</th>
@@ -171,7 +171,7 @@ export default function RemindersPage() {
                 <tbody>
                   {reminderHistory.map((h, idx) => (
                     <tr key={`${h._id || 'history'}-${idx}`}>
-                      <td>{idx + 1}</td>
+                      <td>{`Reminder ${idx + 1}`}</td>
                       <td>{formatDate(h.reminderDate)}</td>
                       <td>{formatDateTime(h.changedAt)}</td>
                       <td>{h.notes || '-'}</td>
