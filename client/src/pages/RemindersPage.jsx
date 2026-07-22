@@ -7,7 +7,7 @@ import Modal from '../components/Modal';
 import { remindersApi, lettersApi } from '../api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { formatDate, getLetterRowClasses } from '../utils/helpers';
+import { formatDate, formatDateTime, getLetterRowClasses } from '../utils/helpers';
 
 export default function RemindersPage() {
   const { hasRole } = useAuth();
@@ -56,6 +56,10 @@ export default function RemindersPage() {
       showToast(err.response?.data?.message || 'Failed', 'error');
     }
   };
+
+  const reminderHistory = (editLetter?.reminderHistory || [])
+    .slice()
+    .sort((a, b) => new Date(b.changedAt || b.reminderDate || 0) - new Date(a.changedAt || a.reminderDate || 0));
 
   const ReminderTable = ({ items, showOverdue, allowComplete = false }) => (
     <table className="data-table reminder-table">
@@ -146,6 +150,37 @@ export default function RemindersPage() {
         <div className="form-field-group">
           <label>Notes</label>
           <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </div>
+        <div className="form-field-group">
+          <label>Previous Reminder Records</label>
+          {reminderHistory.length === 0 ? (
+            <div className="table-empty-state" style={{ marginTop: 8 }}>
+              <p>No previous reminder records.</p>
+            </div>
+          ) : (
+            <div className="table-scroll-container" style={{ maxHeight: 220, marginTop: 8 }}>
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Reminder Date</th>
+                    <th>Updated At</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reminderHistory.map((h, idx) => (
+                    <tr key={`${h._id || 'history'}-${idx}`}>
+                      <td>{idx + 1}</td>
+                      <td>{formatDate(h.reminderDate)}</td>
+                      <td>{formatDateTime(h.changedAt)}</td>
+                      <td>{h.notes || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </Modal>
     </>
