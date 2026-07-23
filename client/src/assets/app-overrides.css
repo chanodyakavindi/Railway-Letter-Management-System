@@ -159,6 +159,11 @@
 
 .actions-cell { display: flex; gap: 6px; flex-wrap: wrap; }
 
+/* Table action cells must stay table-cell or columns overlap */
+#app-screen .data-table td.actions-cell {
+  display: table-cell;
+}
+
 .route-path-cell { font-size: 11px; max-width: 180px; color: var(--c-text-secondary, var(--text-soft)); }
 
 .truncate-cell { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -827,20 +832,67 @@
 }
 
 #app-screen .stat-card::after {
-  content: '';
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  opacity: 0.14;
+  display: none;
 }
 
-#app-screen .border-left-orange::after { background: #d97706; }
-#app-screen .border-left-green::after { background: #38bdf8; }
-#app-screen .border-left-blue::after { background: #1e40af; }
-#app-screen .border-left-purple::after { background: #8b5cf6; }
+#app-screen .stat-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+#app-screen .stat-icon-wrap svg {
+  display: block;
+}
+
+#app-screen .stat-card .bg-orange-soft {
+  background: rgba(217, 119, 6, 0.12);
+  color: #d97706;
+}
+
+#app-screen .stat-card .bg-green-soft {
+  background: rgba(56, 189, 248, 0.14);
+  color: #0284c7;
+}
+
+#app-screen .stat-card .bg-blue-soft {
+  background: rgba(30, 64, 175, 0.12);
+  color: #1e40af;
+}
+
+#app-screen .stat-card .bg-purple-soft {
+  background: rgba(139, 92, 246, 0.14);
+  color: #7c3aed;
+}
+
+#app-screen .letter-status-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 18px 20px 8px;
+}
+
+#app-screen .letter-status-chart-header h3 {
+  margin: 0;
+}
+
+#app-screen .letter-status-chart-card .dashboard-period-toggle {
+  margin-bottom: 0 !important;
+  flex-shrink: 0;
+}
+
+#app-screen .letter-status-chart-card .dashboard-period-toggle .btn {
+  min-width: 84px;
+  min-height: 34px;
+  padding: 6px 16px;
+  font-size: 12px;
+}
 
 #app-screen .border-left-orange { border-left: 4px solid #d97706 !important; }
 #app-screen .border-left-green { border-left: 4px solid #38bdf8 !important; }
@@ -1596,4 +1648,365 @@ html[lang="si"] .login-page .login-subtitle {
     font-size: 10px;
     padding: 8px 6px;
   }
+}
+
+/* ==========================================================================
+   DATA TABLES — unified system (All Letters, Reminders, Action Tracking,
+   Export Report, History Log)
+   Same typography, padding, column tokens; wrap inside cells (no overlap)
+   ========================================================================== */
+
+#app-screen .card-header {
+  padding: 18px 22px 14px;
+  align-items: center;
+}
+
+#app-screen .history-filter-bar,
+#app-screen .export-filters-bar {
+  padding: 4px 22px 14px;
+}
+
+#app-screen .history-filter-bar .filters-row,
+#app-screen .export-filters-bar .filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+#app-screen .reminder-section-header {
+  margin: 4px 2px 12px;
+  padding: 0 2px;
+}
+
+#app-screen .reminder-section-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #111827;
+}
+
+#app-screen .table-scroll-container {
+  width: 100%;
+  margin: 0;
+  padding: 6px 18px 18px;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+#app-screen .data-table {
+  --tbl-pad-y: 10px;
+  --tbl-pad-x: 12px;
+  --tbl-fs-th: 10px;
+  --tbl-fs-td: 12px;
+  --tbl-fs-muted: 11px;
+  --tbl-lh: 1.4;
+  --tbl-border: #e5e7eb;
+  --tbl-head-bg: #f8fafc;
+  --tbl-head-fg: #64748b;
+  --tbl-cell-fg: #1f2937;
+  --tbl-zebra: #f9fafb;
+  --tbl-hover: #f1f5f9;
+
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  background: #ffffff;
+  border: 1px solid var(--tbl-border);
+  border-radius: 10px;
+}
+
+/* Same floor width language across pages — scroll when needed */
+#app-screen .al-table { min-width: 1340px; }
+#app-screen .reminder-table { min-width: 1120px; }
+#app-screen .reminder-table--overdue { min-width: 1200px; }
+#app-screen .at-table { min-width: 1520px; }
+#app-screen .export-table { min-width: 1180px; }
+#app-screen .history-table { min-width: 1120px; }
+
+/* Shared column tokens — same type = same width on every table */
+#app-screen .data-table col.col-id { width: 104px; }
+#app-screen .data-table col.col-date { width: 104px; }
+#app-screen .data-table col.col-datetime { width: 148px; }
+#app-screen .data-table col.col-status { width: 118px; }
+#app-screen .data-table col.col-flag { width: 84px; }
+#app-screen .data-table col.col-role { width: 108px; }
+#app-screen .data-table col.col-action { width: 120px; }
+#app-screen .data-table col.col-ip { width: 118px; }
+#app-screen .data-table col.col-person { width: 132px; }
+#app-screen .data-table col.col-org { width: 156px; }
+#app-screen .data-table col.col-subject { width: 200px; }
+#app-screen .data-table col.col-list { width: 148px; }
+#app-screen .data-table col.col-text { width: 188px; }
+#app-screen .data-table col.col-route { width: 168px; }
+#app-screen .data-table col.col-details { width: 240px; }
+#app-screen .data-table col.col-actions { width: 168px; }
+#app-screen .data-table col.col-actions-wide { width: 268px; }
+
+/* Page-specific flex for remaining space (keeps token columns stable) */
+#app-screen .al-table col.col-subject { width: 18%; }
+#app-screen .al-table col.col-org { width: 14%; }
+#app-screen .al-table col.col-list { width: 13%; }
+#app-screen .al-table col.col-person { width: 11%; }
+#app-screen .al-table col.col-actions-wide { width: 20%; }
+
+#app-screen .reminder-table col.col-subject { width: 24%; }
+#app-screen .reminder-table col.col-org { width: 18%; }
+#app-screen .reminder-table col.col-actions { width: 22%; }
+#app-screen .reminder-table--overdue col.col-subject { width: 20%; }
+#app-screen .reminder-table--overdue col.col-org { width: 15%; }
+#app-screen .reminder-table--overdue col.col-actions { width: 18%; }
+
+#app-screen .at-table col.col-subject { width: 13%; }
+#app-screen .at-table col.col-list { width: 11%; }
+#app-screen .at-table col.col-text { width: 12%; }
+#app-screen .at-table col.col-route { width: 12%; }
+#app-screen .at-table col.col-person { width: 10%; }
+#app-screen .at-table col.col-actions { width: 9%; }
+
+#app-screen .export-table col.col-org { width: 15%; }
+#app-screen .export-table col.col-subject { width: 18%; }
+#app-screen .export-table col.col-route { width: 16%; }
+#app-screen .export-table col.col-text { width: 22%; }
+
+#app-screen .history-table col.col-person { width: 12%; }
+#app-screen .history-table col.col-action { width: 12%; }
+#app-screen .history-table col.col-details { width: 28%; }
+
+/* Headers — identical on every table */
+#app-screen .data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: var(--tbl-pad-y) var(--tbl-pad-x);
+  background: var(--tbl-head-bg);
+  color: var(--tbl-head-fg);
+  font-size: var(--tbl-fs-th);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+  line-height: var(--tbl-lh);
+  border-bottom: 1px solid #e2e8f0;
+  box-sizing: border-box;
+}
+
+/* Body cells — identical rhythm; wrap inside column (no neighbor bleed) */
+#app-screen .data-table tbody td {
+  padding: var(--tbl-pad-y) var(--tbl-pad-x);
+  font-size: var(--tbl-fs-td);
+  font-weight: 400;
+  line-height: var(--tbl-lh);
+  color: var(--tbl-cell-fg);
+  vertical-align: top;
+  border-bottom: 1px solid #eef2f7;
+  box-sizing: border-box;
+  height: auto;
+  /* Forces content to stay in its column under table-layout:fixed */
+  max-width: 0;
+  overflow-x: hidden;
+  overflow-y: visible;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+#app-screen .data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+#app-screen .data-table tbody tr:nth-child(even) td {
+  background: var(--tbl-zebra);
+}
+
+#app-screen .data-table tbody tr:hover td {
+  background: var(--tbl-hover);
+}
+
+/* Text blocks — full content visible via wrapping */
+#app-screen .data-table .cell-wrap {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: var(--tbl-lh);
+  font-size: var(--tbl-fs-td);
+}
+
+#app-screen .data-table .cell-wrap.cell-muted {
+  color: #64748b;
+  font-size: var(--tbl-fs-muted);
+}
+
+#app-screen .data-table .cell-id {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  font-size: var(--tbl-fs-td);
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+}
+
+#app-screen .data-table .cell-date,
+#app-screen .data-table .cell-nowrap,
+#app-screen .data-table .cell-flag {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--tbl-fs-td);
+  font-variant-numeric: tabular-nums;
+}
+
+#app-screen .data-table .cell-status {
+  white-space: normal;
+}
+
+/* Compact badges — same size in every table */
+#app-screen .data-table .status-badge,
+#app-screen .data-table .stage-badge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  padding: 3px 7px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+/* Actions column — td stays table-cell; buttons share one style */
+#app-screen .data-table th.actions-column-header,
+#app-screen .data-table td.actions-cell {
+  text-align: right;
+  padding-right: 14px;
+}
+
+#app-screen .export-table thead th:last-child,
+#app-screen .history-table thead th:last-child,
+#app-screen .export-table tbody td:last-child,
+#app-screen .history-table tbody td:last-child {
+  text-align: left;
+}
+
+#app-screen .data-table td.actions-cell {
+  display: table-cell;
+  vertical-align: top;
+  white-space: normal;
+  max-width: none;
+  overflow: visible;
+}
+
+#app-screen .data-table .actions-cell-inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  width: 100%;
+}
+
+#app-screen .data-table .actions-cell-inner .btn {
+  margin: 0;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 5px 9px;
+  min-height: 28px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+#app-screen .table-empty-state {
+  padding: 48px 28px;
+  margin: 0 8px 12px;
+}
+
+#app-screen .completed-reminders-card .data-table thead th {
+  background: var(--tbl-head-bg);
+}
+
+#app-screen .truncate-cell,
+#app-screen .route-path-cell {
+  display: block;
+  width: 100%;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  font-size: var(--tbl-fs-td);
+  line-height: var(--tbl-lh);
+  overflow: visible;
+  text-overflow: unset;
+  max-width: none;
+}
+
+@media (max-width: 720px) {
+  #app-screen .table-scroll-container {
+    padding: 4px 10px 14px;
+  }
+
+  #app-screen .data-table {
+    --tbl-pad-y: 8px;
+    --tbl-pad-x: 10px;
+    --tbl-fs-th: 9px;
+    --tbl-fs-td: 11px;
+    --tbl-fs-muted: 10px;
+  }
+
+  #app-screen .data-table .actions-cell-inner .btn {
+    font-size: 10px;
+    padding: 4px 8px;
+    min-height: 26px;
+  }
+
+  #app-screen .card-header,
+  #app-screen .history-filter-bar,
+  #app-screen .export-filters-bar {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+.dark-theme #app-screen .data-table {
+  --tbl-border: var(--c-border, #334155);
+  --tbl-head-bg: var(--c-surface-muted, #0f172a);
+  --tbl-head-fg: var(--c-text-secondary, #94a3b8);
+  --tbl-cell-fg: var(--c-text-primary, #e2e8f0);
+  --tbl-zebra: rgba(148, 163, 184, 0.04);
+  --tbl-hover: rgba(148, 163, 184, 0.1);
+  background: var(--c-surface-card, #1e293b);
+  border-color: var(--tbl-border);
+}
+
+.dark-theme #app-screen .data-table thead th {
+  border-bottom-color: var(--c-border, #334155);
+}
+
+.dark-theme #app-screen .data-table tbody td {
+  border-bottom-color: var(--c-border, #334155);
+}
+
+.dark-theme #app-screen .data-table .cell-id {
+  color: var(--c-text-primary, #f1f5f9);
+}
+
+.dark-theme #app-screen .data-table .cell-wrap.cell-muted {
+  color: var(--c-text-secondary, #94a3b8);
+}
+
+.dark-theme #app-screen .reminder-section-header h3 {
+  color: var(--c-text-primary, #f1f5f9);
 }

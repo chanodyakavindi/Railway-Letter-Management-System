@@ -210,19 +210,6 @@ export default function DashboardPage() {
             <div className="welcome-gradient-shape" />
           </div>
 
-          <div className="btn-group-toggle dashboard-period-toggle">
-            {['daily', 'weekly', 'monthly'].map((p) => (
-              <button
-                key={p}
-                type="button"
-                className={`btn btn-outline btn-sm ${period === p ? 'active' : ''}`}
-                onClick={() => setPeriod(p)}
-              >
-                {t(PERIOD_LABELS[p].en, PERIOD_LABELS[p].si)}
-              </button>
-            ))}
-          </div>
-
           <div className="stats-card-grid four-cols">
             <div
               className="stat-card border-left-orange clickable-card"
@@ -231,7 +218,17 @@ export default function DashboardPage() {
               onClick={() => navigateToLetters('Draft')}
               onKeyDown={keyboardClick(() => navigateToLetters('Draft'))}
             >
-              <div className="stat-main"><span className="stat-number">{stats?.draft || 0}</span></div>
+              <div className="stat-main">
+                <span className="stat-number">{stats?.draft || 0}</span>
+                <span className="stat-icon-wrap bg-orange-soft" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 2v6h6" />
+                    <path d="M8 13h8" />
+                    <path d="M8 17h5" />
+                  </svg>
+                </span>
+              </div>
               <span className="stat-label">{t('Draft Letters', 'කෙටුම්පත් ලිපි')}</span>
             </div>
             <div
@@ -241,7 +238,15 @@ export default function DashboardPage() {
               onClick={() => navigateToLetters('Completed')}
               onKeyDown={keyboardClick(() => navigateToLetters('Completed'))}
             >
-              <div className="stat-main"><span className="stat-number">{stats?.completed || 0}</span></div>
+              <div className="stat-main">
+                <span className="stat-number">{stats?.completed || 0}</span>
+                <span className="stat-icon-wrap bg-green-soft" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="M22 4 12 14.01l-3-3" />
+                  </svg>
+                </span>
+              </div>
               <span className="stat-label">{t('Completed', 'අවසන්')}</span>
             </div>
             <div
@@ -251,7 +256,14 @@ export default function DashboardPage() {
               onClick={() => navigateToLetters()}
               onKeyDown={keyboardClick(() => navigateToLetters())}
             >
-              <div className="stat-main"><span className="stat-number">{stats?.total || 0}</span></div>
+              <div className="stat-main">
+                <span className="stat-number">{stats?.total || 0}</span>
+                <span className="stat-icon-wrap bg-blue-soft" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg>
+                </span>
+              </div>
               <span className="stat-label">{t('All Letters', 'සියලු ලිපි')}</span>
             </div>
             <div
@@ -262,10 +274,18 @@ export default function DashboardPage() {
               onKeyDown={keyboardClick(navigateToReminders)}
             >
               <div className="stat-main">
-                <span className="stat-number">{stats?.activeReminders || 0}</span>
-                <div className="stat-sub-metrics">
-                  <span>{stats?.overdue || 0} {t('Overdue', 'කල් ඉකුත් වූ')}</span>
+                <div>
+                  <span className="stat-number">{stats?.activeReminders || 0}</span>
+                  <div className="stat-sub-metrics">
+                    <span>{stats?.overdue || 0} {t('Overdue', 'කල් ඉකුත් වූ')}</span>
+                  </div>
                 </div>
+                <span className="stat-icon-wrap bg-purple-soft" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                  </svg>
+                </span>
               </div>
               <span className="stat-label">{t('Reminders', 'මතක් කිරීම්')}</span>
             </div>
@@ -290,9 +310,21 @@ export default function DashboardPage() {
           </div> */}
 
           <div className="dashboard-charts-grid">
-            <div className="card chart-card">
-              <div className="card-header">
+            <div className="card chart-card letter-status-chart-card">
+              <div className="card-header letter-status-chart-header">
                 <h3>{t('Letter Status', 'ලිපි තත්ත්වය')}</h3>
+                <div className="btn-group-toggle dashboard-period-toggle">
+                  {['daily', 'weekly', 'monthly'].map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      className={`btn btn-outline btn-sm ${period === p ? 'active' : ''}`}
+                      onClick={() => setPeriod(p)}
+                    >
+                      {t(PERIOD_LABELS[p].en, PERIOD_LABELS[p].si)}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="svg-chart-container">
                 <GroupedBarChart

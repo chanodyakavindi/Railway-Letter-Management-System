@@ -41,7 +41,16 @@ export default function HistoryPage() {
             <EmptyState title="No activity logs match your filters" />
           ) : (
             <div className="table-scroll-container">
-              <table className="data-table">
+              <table className="data-table history-table">
+                <colgroup>
+                  <col className="col-datetime" />
+                  <col className="col-person" />
+                  <col className="col-role" />
+                  <col className="col-action" />
+                  <col className="col-details" />
+                  <col className="col-id" />
+                  <col className="col-ip" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Date/Time</th>
@@ -56,13 +65,13 @@ export default function HistoryPage() {
                 <tbody>
                   {logs.map((log) => (
                     <tr key={log._id}>
-                      <td>{formatDateTime(log.createdAt)}</td>
-                      <td>{log.userName || log.user?.fullName}</td>
-                      <td>{log.userRole}</td>
-                      <td>{log.action}</td>
-                      <td>{log.details}</td>
-                      <td>{log.letterId || log.letterRef?.letterId || '-'}</td>
-                      <td>{log.ipAddress || '-'}</td>
+                      <td className="cell-date">{formatDateTime(log.createdAt)}</td>
+                      <td><span className="cell-wrap" title={log.userName || log.user?.fullName || ''}>{log.userName || log.user?.fullName}</span></td>
+                      <td className="cell-nowrap">{log.userRole}</td>
+                      <td><span className="cell-wrap" title={log.action || ''}>{log.action}</span></td>
+                      <td><span className="cell-wrap" title={log.details || ''}>{log.details}</span></td>
+                      <td className="cell-id">{log.letterId || log.letterRef?.letterId || '-'}</td>
+                      <td className="cell-nowrap">{log.ipAddress || '-'}</td>
                     </tr>
                   ))}
                 </tbody>

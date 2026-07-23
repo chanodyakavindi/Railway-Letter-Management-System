@@ -60,6 +60,15 @@ export default function ExportReportPage() {
           ) : (
             <div className="table-scroll-container">
               <table className="data-table export-table">
+                <colgroup>
+                  <col className="col-id" />
+                  <col className="col-date" />
+                  <col className="col-org" />
+                  <col className="col-subject" />
+                  <col className="col-route" />
+                  <col className="col-status" />
+                  <col className="col-text" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Ref ID</th>
@@ -74,13 +83,13 @@ export default function ExportReportPage() {
                 <tbody>
                   {letters.map((l) => (
                     <tr key={l._id}>
-                      <td>{l.letterId}</td>
-                      <td>{formatDate(l.dateReceived)}</td>
-                      <td>{l.referredEntity}</td>
-                      <td>{l.title}</td>
-                      <td>{(l.sendTo || []).join(' → ')}</td>
-                      <td><StatusBadge status={l.status} /></td>
-                      <td>{l.actionTaken || '-'}</td>
+                      <td className="cell-id">{l.letterId}</td>
+                      <td className="cell-date">{formatDate(l.dateReceived)}</td>
+                      <td><span className="cell-wrap" title={l.referredEntity || ''}>{l.referredEntity}</span></td>
+                      <td><span className="cell-wrap" title={l.title || ''}>{l.title}</span></td>
+                      <td><span className="cell-wrap cell-muted" title={(l.sendTo || []).join(' → ')}>{(l.sendTo || []).join(' → ')}</span></td>
+                      <td className="cell-status"><StatusBadge status={l.status} /></td>
+                      <td><span className="cell-wrap" title={l.actionTaken || ''}>{l.actionTaken || '-'}</span></td>
                     </tr>
                   ))}
                 </tbody>

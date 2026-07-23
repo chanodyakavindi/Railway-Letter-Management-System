@@ -261,6 +261,17 @@ export default function AllLettersPage() {
             <div className="table-scroll-container">
 
               <table className="data-table al-table">
+                <colgroup>
+                  <col className="col-id" />
+                  <col className="col-date" />
+                  <col className="col-subject" />
+                  <col className="col-org" />
+                  <col className="col-status" />
+                  <col className="col-date" />
+                  <col className="col-list" />
+                  <col className="col-person" />
+                  <col className="col-actions-wide" />
+                </colgroup>
 
                 <thead>
 
@@ -274,7 +285,7 @@ export default function AllLettersPage() {
                     <th>Reminder</th>
                     <th>Recipients</th>
                     <th>Created By</th>
-                    <th>Actions</th>
+                    <th className="actions-column-header">Actions</th>
 
                   </tr>
 
@@ -296,44 +307,43 @@ export default function AllLettersPage() {
                   >
 
 
-                    <td>{l.letterId}</td>
+                    <td className="cell-id">{l.letterId}</td>
 
-                    <td>
+                    <td className="cell-date">
                       {formatDate(l.dateReceived)}
                     </td>
 
                     <td>
-                      {l.title}
+                      <span className="cell-wrap" title={l.title || ''}>{l.title}</span>
                     </td>
 
                     <td>
-                      {l.referredEntity}
+                      <span className="cell-wrap" title={l.referredEntity || ''}>{l.referredEntity}</span>
                     </td>
 
-                    <td>
+                    <td className="cell-status">
                       <StatusBadge
                         status={l.status}
                         reminderStatus={l.reminderStatus}
                       />
                     </td>
 
-                    <td>
+                    <td className="cell-date">
                       {formatDate(l.reminderDate)}
                     </td>
 
                     <td>
-                      {recipientsSummary(l)}
+                      <span className="cell-wrap" title={recipientsSummary(l)}>{recipientsSummary(l)}</span>
                     </td>
 
 
                     <td>
-                      {l.createdBy?.fullName}
+                      <span className="cell-wrap" title={l.createdBy?.fullName || ''}>{l.createdBy?.fullName}</span>
                     </td>
 
 
                     <td className="actions-cell">
-
-
+                      <div className="actions-cell-inner">
                       <button
                         type="button"
                         className="btn btn-outline btn-sm"
@@ -363,7 +373,9 @@ export default function AllLettersPage() {
                           // NEW CHANGE: Sends selected letter ID to reply handler
                           onClick={() => replyToLetter(l._id)}>Reply to letter</button>
 
-                      }</td></tr>
+                      }
+                      </div>
+                    </td></tr>
 
                   ))
                 }

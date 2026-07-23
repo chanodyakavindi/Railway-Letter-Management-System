@@ -39,7 +39,20 @@ export default function ActionTrackingPage() {
             <EmptyState title="No correspondences found" />
           ) : (
             <div className="table-scroll-container">
-              <table className="data-table">
+              <table className="data-table at-table">
+                <colgroup>
+                  <col className="col-id" />
+                  <col className="col-subject" />
+                  <col className="col-status" />
+                  <col className="col-person" />
+                  <col className="col-list" />
+                  <col className="col-list" />
+                  <col className="col-text" />
+                  <col className="col-date" />
+                  <col className="col-date" />
+                  <col className="col-route" />
+                  <col className="col-actions" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Letter ID</th>
@@ -52,24 +65,26 @@ export default function ActionTrackingPage() {
                     <th>Reminder</th>
                     <th>Last Updated</th>
                     <th>Route</th>
-                    <th>Actions</th>
+                    <th className="actions-column-header">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {letters.map((l) => (
                     <tr key={l._id}>
-                      <td>{l.letterId}</td>
-                      <td>{l.title}</td>
-                      <td><StatusBadge status={l.status} /></td>
-                      <td>{l.createdBy?.fullName}</td>
-                      <td>{(l.sendTo || []).join(', ')}</td>
-                      <td>{(l.sendCopiesTo || []).join(', ')}</td>
-                      <td className="truncate-cell">{l.actionTaken || '-'}</td>
-                      <td>{formatDate(l.reminderDate)}</td>
-                      <td>{formatDate(l.updatedAt)}</td>
-                      <td className="route-path-cell">{routePath(l)}</td>
-                      <td>
-                        <button type="button" className="btn btn-outline btn-sm" onClick={() => setSelected(l)}>View</button>
+                      <td className="cell-id">{l.letterId}</td>
+                      <td><span className="cell-wrap" title={l.title || ''}>{l.title}</span></td>
+                      <td className="cell-status"><StatusBadge status={l.status} /></td>
+                      <td><span className="cell-wrap" title={l.createdBy?.fullName || ''}>{l.createdBy?.fullName}</span></td>
+                      <td><span className="cell-wrap" title={(l.sendTo || []).join(', ')}>{(l.sendTo || []).join(', ')}</span></td>
+                      <td><span className="cell-wrap" title={(l.sendCopiesTo || []).join(', ')}>{(l.sendCopiesTo || []).join(', ') || '-'}</span></td>
+                      <td><span className="cell-wrap" title={l.actionTaken || ''}>{l.actionTaken || '-'}</span></td>
+                      <td className="cell-date">{formatDate(l.reminderDate)}</td>
+                      <td className="cell-date">{formatDate(l.updatedAt)}</td>
+                      <td><span className="cell-wrap cell-muted" title={routePath(l)}>{routePath(l)}</span></td>
+                      <td className="actions-cell">
+                        <div className="actions-cell-inner">
+                          <button type="button" className="btn btn-outline btn-sm" onClick={() => setSelected(l)}>View</button>
+                        </div>
                       </td>
                     </tr>
                   ))}

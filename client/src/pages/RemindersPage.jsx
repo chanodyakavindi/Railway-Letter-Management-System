@@ -62,7 +62,16 @@ export default function RemindersPage() {
     .sort((a, b) => new Date(b.changedAt || b.reminderDate || 0) - new Date(a.changedAt || a.reminderDate || 0));
 
   const ReminderTable = ({ items, showOverdue, allowComplete = false }) => (
-    <table className="data-table reminder-table">
+    <table className={`data-table reminder-table${showOverdue ? ' reminder-table--overdue' : ''}`}>
+      <colgroup>
+        <col className="col-id" />
+        <col className="col-subject" />
+        <col className="col-org" />
+        <col className="col-status" />
+        <col className="col-date" />
+        {showOverdue && <col className="col-flag" />}
+        <col className="col-actions" />
+      </colgroup>
       <thead>
         <tr>
           <th>Ref ID</th>
@@ -71,20 +80,20 @@ export default function RemindersPage() {
           <th>Status</th>
           <th>Reminder Date</th>
           {showOverdue && <th>Overdue?</th>}
-          <th>Actions</th>
+          <th className="actions-column-header">Actions</th>
         </tr>
       </thead>
       <tbody>
         {items.map((l) => (
           <tr key={l._id} className={getLetterRowClasses(l.status, l.reminderStatus)}>
-            <td>{l.letterId}</td>
-            <td>{l.title}</td>
-            <td>{l.referredEntity}</td>
-            <td><StatusBadge status={l.status} /></td>
-            <td>{formatDate(l.reminderDate)}</td>
-            {showOverdue && <td>{l.reminderStatus === 'overdue' ? 'Yes' : 'No'}</td>}
-            <td>
-              <div className="actions-cell">
+            <td className="cell-id">{l.letterId}</td>
+            <td><span className="cell-wrap" title={l.title || ''}>{l.title}</span></td>
+            <td><span className="cell-wrap" title={l.referredEntity || ''}>{l.referredEntity}</span></td>
+            <td className="cell-status"><StatusBadge status={l.status} /></td>
+            <td className="cell-date">{formatDate(l.reminderDate)}</td>
+            {showOverdue && <td className="cell-flag">{l.reminderStatus === 'overdue' ? 'Yes' : 'No'}</td>}
+            <td className="actions-cell">
+              <div className="actions-cell-inner">
                 {hasRole('officer') && (
                   <button type="button" className="btn btn-outline btn-sm" onClick={() => openEdit(l)}>Edit</button>
                 )}
@@ -117,14 +126,22 @@ export default function RemindersPage() {
               <h3>Pending Reminders ({data.active.length})</h3>
             </div>
             <div className="card" style={{ marginBottom: 24 }}>
-              {data.active.length === 0 ? <EmptyState title="No pending reminders" /> : <ReminderTable items={data.active} showOverdue allowComplete />}
+              {data.active.length === 0 ? <EmptyState title="No pending reminders" /> : (
+                <div className="table-scroll-container">
+                  <ReminderTable items={data.active} showOverdue allowComplete />
+                </div>
+              )}
             </div>
 
             <div className="reminder-section-header completed-section-header">
               <h3>Completed ({data.completed.length})</h3>
             </div>
             <div className="card completed-reminders-card" style={{ marginBottom: 24 }}>
-              {data.completed.length === 0 ? <EmptyState title="No completed reminders" /> : <ReminderTable items={data.completed} />}
+              {data.completed.length === 0 ? <EmptyState title="No completed reminders" /> : (
+                <div className="table-scroll-container">
+                  <ReminderTable items={data.completed} />
+                </div>
+              )}
             </div>
 
           </>
