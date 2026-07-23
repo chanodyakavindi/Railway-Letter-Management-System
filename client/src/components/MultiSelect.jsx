@@ -17,7 +17,10 @@ export default function MultiSelect({ options, value = [], onChange, placeholder
     onChange(next);
   };
 
-  const display = value.length ? value.join(', ') : placeholder;
+  const labelByValue = new Map(options.map((opt) => [opt.value, opt.label]));
+  const display = value.length
+    ? value.map((v) => labelByValue.get(v) || v).join(', ')
+    : placeholder;
 
   return (
     <div className="custom-multiselect" ref={ref}>

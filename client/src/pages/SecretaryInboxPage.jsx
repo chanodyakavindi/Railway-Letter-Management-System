@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import EmptyState from '../components/EmptyState';
@@ -11,6 +12,7 @@ import { useToast } from '../context/ToastContext';
 import { formatDate, buildLetterFormData } from '../utils/helpers';
 
 export default function SecretaryInboxPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { showToast } = useToast();
   const [letters, setLetters] = useState([]);
@@ -43,6 +45,10 @@ export default function SecretaryInboxPage() {
     } catch (err) {
       showToast(err.response?.data?.message || 'Reply failed', 'error');
     }
+  };
+
+  const openReplyForm = (letter) => {
+    navigate(`/add-letter?tab=reply&replyFrom=${letter._id}`);
   };
 
   return (
@@ -80,7 +86,7 @@ export default function SecretaryInboxPage() {
                       <td><StatusBadge status={l.status} /></td>
                       <td>
                         <button type="button" className="btn btn-outline btn-sm" onClick={() => setSelected(l)}>View</button>
-                        <button type="button" className="btn btn-primary btn-sm" onClick={() => setReplyLetter(l)}>Reply</button>
+                        <button type="button" className="btn btn-primary btn-sm" onClick={() => openReplyForm(l)}>Reply</button>
                       </td>
                     </tr>
                   ))}
@@ -95,7 +101,7 @@ export default function SecretaryInboxPage() {
         letter={selected}
         open={!!selected}
         onClose={() => setSelected(null)}
-        onReply={(l) => { setSelected(null); setReplyLetter(l); }}
+        onReply={(l) => { setSelected(null); openReplyForm(l); }}
       />
 
       <Modal
