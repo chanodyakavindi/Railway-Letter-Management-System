@@ -263,22 +263,22 @@ export default function DashboardPage() {
           </div>
 
           <div className="stats-card-grid four-cols" style={{ marginTop: 12 }}>
-            <div className="stat-card border-left-orange">
+            {/* <div className="stat-card border-left-orange">
               <div className="stat-main"><span className="stat-number">{stats?.pending || 0}</span></div>
               <span className="stat-label">Pending / පොරොත්තු</span>
-            </div>
-            <div className="stat-card" style={{ borderLeft: '4px solid #ef4444' }}>
+            </div> */}
+            {/* <div className="stat-card" style={{ borderLeft: '4px solid #ef4444' }}>
               <div className="stat-main"><span className="stat-number">{stats?.noAction || 0}</span></div>
               <span className="stat-label">No Action / ක්‍රියාමාර්ග නැත</span>
-            </div>
+            </div> */}
           </div>
 
-          <div className="quick-actions-bar">
+          {/* <div className="quick-actions-bar">
             <Link to="/add-letter" className="btn btn-primary btn-sm">+ Add Letter</Link>
             <Link to="/letters" className="btn btn-secondary btn-sm">All Letters</Link>
             <Link to="/reminders" className="btn btn-secondary btn-sm">Reminders</Link>
             <Link to="/export" className="btn btn-outline btn-sm">Export Report</Link>
-          </div>
+          </div> */}
 
           <div className="dashboard-charts-grid">
             <div className="card chart-card">
@@ -316,7 +316,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {summary && (
+          {/* {summary && (
             <div className="card" style={{ marginBottom: 20 }}>
               <div className="card-header">
                 <h3>Daily Summary / දෛනික සාරාංශය</h3>
@@ -329,7 +329,7 @@ export default function DashboardPage() {
                 <div className="summary-item">Old Drafts (7d+): <strong>{summary.oldDrafts?.length || 0}</strong></div>
               </div>
             </div>
-          )}
+          )} */}
 
         </section>
       </div>
