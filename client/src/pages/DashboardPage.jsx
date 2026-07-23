@@ -3,22 +3,30 @@ import { Link, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Loading from '../components/Loading';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { dashboardApi, usersApi } from '../api';
+import { displayUserName } from '../utils/i18n';
 
-function buildPeriodChartData(periodStats) {
+const PERIOD_LABELS = {
+  daily: { en: 'Daily', si: 'දෛනික' },
+  weekly: { en: 'Weekly', si: 'සතිපතා' },
+  monthly: { en: 'Monthly', si: 'මාසික' },
+};
+
+function buildPeriodChartData(periodStats, t) {
   return [
     {
-      label: 'Daily',
+      label: t ? t('Daily', 'දෛනික') : 'Daily',
       draft: periodStats?.daily?.draft || 0,
       completed: periodStats?.daily?.completed || 0,
     },
     {
-      label: 'Weekly',
+      label: t ? t('Weekly', 'සතිපතා') : 'Weekly',
       draft: periodStats?.weekly?.draft || 0,
       completed: periodStats?.weekly?.completed || 0,
     },
     {
-      label: 'Monthly',
+      label: t ? t('Monthly', 'මාසික') : 'Monthly',
       draft: periodStats?.monthly?.draft || 0,
       completed: periodStats?.monthly?.completed || 0,
     },
@@ -111,6 +119,7 @@ function GroupedBarChart({
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t, lang } = useLanguage();
   const [period, setPeriod] = useState('daily');
   const [stats, setStats] = useState(null);
   const [summary, setSummary] = useState(null);
@@ -176,7 +185,7 @@ export default function DashboardPage() {
     );
   }
 
-  const letterStatusChartData = buildPeriodChartData(periodStats);
+  const letterStatusChartData = buildPeriodChartData(periodStats, t);
   const staffActivityChartData = [...tracking]
     .map((t) => ({
       id: t.user._id,
@@ -195,13 +204,13 @@ export default function DashboardPage() {
         <section className="app-page active">
           <div className="welcome-banner">
             <div className="welcome-texts">
-              <h1>ආයුබෝවන්, {user?.fullName}!</h1>
-              <p>Welcome to the Railway Letter Management portal.</p>
+              <h1>{t('Welcome', 'ආයුබෝවන්')}, {displayUserName(user, lang)}!</h1>
+              <p>{t('Welcome to the Railway Letter Management portal.', 'දුම්රිය ලිපි කළමනාකරණ ද්වාරයට ඔබව සාදරයෙන් පිළිගනිමු.')}</p>
             </div>
             <div className="welcome-gradient-shape" />
           </div>
 
-          <div className="btn-group-toggle" style={{ marginBottom: 16 }}>
+          <div className="btn-group-toggle dashboard-period-toggle">
             {['daily', 'weekly', 'monthly'].map((p) => (
               <button
                 key={p}
@@ -209,7 +218,7 @@ export default function DashboardPage() {
                 className={`btn btn-outline btn-sm ${period === p ? 'active' : ''}`}
                 onClick={() => setPeriod(p)}
               >
-                {p.charAt(0).toUpperCase() + p.slice(1)}
+                {t(PERIOD_LABELS[p].en, PERIOD_LABELS[p].si)}
               </button>
             ))}
           </div>
@@ -223,7 +232,7 @@ export default function DashboardPage() {
               onKeyDown={keyboardClick(() => navigateToLetters('Draft'))}
             >
               <div className="stat-main"><span className="stat-number">{stats?.draft || 0}</span></div>
-              <span className="stat-label">Draft Letters / කෙටුම්පත්</span>
+              <span className="stat-label">{t('Draft Letters', 'කෙටුම්පත් ලිපි')}</span>
             </div>
             <div
               className="stat-card border-left-green clickable-card"
@@ -233,7 +242,7 @@ export default function DashboardPage() {
               onKeyDown={keyboardClick(() => navigateToLetters('Completed'))}
             >
               <div className="stat-main"><span className="stat-number">{stats?.completed || 0}</span></div>
-              <span className="stat-label">Completed / අවසන්</span>
+              <span className="stat-label">{t('Completed', 'අවසන්')}</span>
             </div>
             <div
               className="stat-card border-left-blue clickable-card"
@@ -243,7 +252,7 @@ export default function DashboardPage() {
               onKeyDown={keyboardClick(() => navigateToLetters())}
             >
               <div className="stat-main"><span className="stat-number">{stats?.total || 0}</span></div>
-              <span className="stat-label">All Letters / සියලු</span>
+              <span className="stat-label">{t('All Letters', 'සියලු ලිපි')}</span>
             </div>
             <div
               className="stat-card border-left-purple clickable-card"
@@ -255,10 +264,10 @@ export default function DashboardPage() {
               <div className="stat-main">
                 <span className="stat-number">{stats?.activeReminders || 0}</span>
                 <div className="stat-sub-metrics">
-                  <span>{stats?.overdue || 0} Overdue</span>
+                  <span>{stats?.overdue || 0} {t('Overdue', 'කල් ඉකුත් වූ')}</span>
                 </div>
               </div>
-              <span className="stat-label">Reminders / මතක් කිරීම්</span>
+              <span className="stat-label">{t('Reminders', 'මතක් කිරීම්')}</span>
             </div>
           </div>
 
@@ -283,36 +292,36 @@ export default function DashboardPage() {
           <div className="dashboard-charts-grid">
             <div className="card chart-card">
               <div className="card-header">
-                <h3>Letter Status</h3>
+                <h3>{t('Letter Status', 'ලිපි තත්ත්වය')}</h3>
               </div>
               <div className="svg-chart-container">
                 <GroupedBarChart
                   data={letterStatusChartData}
                   leftKey="draft"
                   rightKey="completed"
-                  leftLabel="Draft"
-                  rightLabel="Completed"
-                  emptyText="No letter status data available"
+                  leftLabel={t('Draft', 'කෙටුම්පත')}
+                  rightLabel={t('Completed', 'අවසන්')}
+                  emptyText={t('No letter status data available', 'ලිපි තත්ත්ව දත්ත නොමැත')}
                 />
               </div>
-              <div className="chart-caption">Draft vs completed counts by dashboard periods.</div>
+              <div className="chart-caption">{t('Draft vs completed counts by dashboard periods.', 'පුවරු කාලසීමා අනුව කෙටුම්පත් හා අවසන් ගණන.')}</div>
             </div>
 
             <div className="card chart-card">
               <div className="card-header">
-                <h3>Staff Activity (8am-5pm)</h3>
+                <h3>{t('Staff Activity (8am-5pm)', 'කාර්ය මණ්ඩල ක්‍රියාකාරිත්වය (පෙ.ව. 8-ප.ව. 5)')}</h3>
               </div>
               <div className="svg-chart-container">
                 <GroupedBarChart
                   data={staffActivityChartData}
                   leftKey="draft"
                   rightKey="completed"
-                  leftLabel="Draft"
-                  rightLabel="Completed"
-                  emptyText="No staff activity data available"
+                  leftLabel={t('Draft', 'කෙටුම්පත')}
+                  rightLabel={t('Completed', 'අවසන්')}
+                  emptyText={t('No staff activity data available', 'කාර්ය මණ්ඩල ක්‍රියාකාරිත්ව දත්ත නොමැත')}
                 />
               </div>
-              <div className="chart-caption">Top 8 staff based on draft + completed letters.</div>
+              <div className="chart-caption">{t('Top 8 staff based on draft + completed letters.', 'කෙටුම්පත් + අවසන් ලිපි මත පදනම්ව ඉහළම කාර්ය මණ්ඩල 8.')}</div>
             </div>
           </div>
 

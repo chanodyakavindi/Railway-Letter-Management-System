@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { notificationsApi } from '../api';
 import { useLanguage } from '../context/LanguageContext';
+import { displayUserName } from '../utils/i18n';
 
 export default function Header({ title, search, onSearch }) {
   const { user } = useAuth();
@@ -12,17 +13,27 @@ export default function Header({ title, search, onSearch }) {
 
   useEffect(() => {
     const tick = () => {
-      setClock(new Date().toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true,
-      }));
+      if (lang === 'si') {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const period = hours < 12 ? 'පෙ.ව.' : 'ප.ව.';
+        hours = hours % 12 || 12;
+        setClock(`${hours}:${minutes}:${seconds} ${period}`);
+      } else {
+        setClock(new Date().toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true,
+        }));
+      }
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [lang]);
 
   useEffect(() => {
     notificationsApi.unreadCount()
@@ -41,6 +52,7 @@ export default function Header({ title, search, onSearch }) {
             type="button"
             className={`btn btn-outline btn-sm ${lang === 'en' ? 'active' : ''}`}
             onClick={() => setLang('en')}
+            aria-label={t('English', 'ඉංග්‍රීසි')}
           >
             EN
           </button>
@@ -48,8 +60,9 @@ export default function Header({ title, search, onSearch }) {
             type="button"
             className={`btn btn-outline btn-sm ${lang === 'si' ? 'active' : ''}`}
             onClick={() => setLang('si')}
+            aria-label={t('Sinhala', 'සිංහල')}
           >
-            SI
+            සි
           </button>
         </div>
         {onSearch && (
@@ -63,7 +76,7 @@ export default function Header({ title, search, onSearch }) {
             />
           </div>
         )}
-        <Link to="/notifications" className="notif-btn" aria-label="Notifications">
+        <Link to="/notifications" className="notif-btn" aria-label={t('Notifications', 'දැනුම්දීම්')}>
           <svg className="notif-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path
               d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5"
@@ -85,7 +98,7 @@ export default function Header({ title, search, onSearch }) {
         </Link>
         <Link to="/history" className="btn btn-outline btn-sm">{t('History', 'ඉතිහාසය')}</Link>
         <time className="live-clock" dateTime={clock}>{clock}</time>
-        <span className="header-profile-icon" aria-label={user?.fullName}>
+        <span className="header-profile-icon" aria-label={displayUserName(user, lang) || user?.fullName}>
           <svg className="profile-icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" strokeWidth="1.75" />
             <path

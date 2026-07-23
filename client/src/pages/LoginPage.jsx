@@ -12,15 +12,15 @@ const ROLE_GROUPS = {
     badge: 'Create/Edit Access (No Delete) / නිර්මාණය හා සංස්කරණය (මකා දැමීම නැත)',
     badgeClass: 'badge-officer',
     users: [
-      { username: 'priyangani', label: '151 — Priyangani (Officer)' },
-      { username: 'gayanthi', label: '135 — Gayanthi (Officer)' },
-      { username: 'purnima', label: '142 — Purnima (Officer)' },
-      { username: 'dulani', label: '141 — Dulani (Officer)' },
-      { username: 'chathura', label: '144 — Chathura (Officer)' },
-      { username: 'erandi', label: '143 — Erandi (Officer)' },
-      { username: 'sandareka', label: '140 — Sandareka (Officer)' },
-      { username: 'chathurika', label: '137 — Chathurika (Officer)' },
-      { username: 'prabhamili', label: '205 — Prabhamili (Officer)' },
+      { username: 'priyangani', label: '151 — Priyangani (Officer) / 151 — ප්‍රියංගනී (නිලධාරී)' },
+      { username: 'gayanthi', label: '135 — Gayanthi (Officer) / 135 — ගයන්ති (නිලධාරී)' },
+      { username: 'purnima', label: '142 — Purnima (Officer) / 142 — පූර්ණිමා (නිලධාරී)' },
+      { username: 'dulani', label: '141 — Dulani (Officer) / 141 — දුලානි (නිලධාරී)' },
+      { username: 'chathura', label: '144 — Chathura (Officer) / 144 — චතුර (නිලධාරී)' },
+      { username: 'erandi', label: '143 — Erandi (Officer) / 143 — එරන්දි (නිලධාරී)' },
+      { username: 'sandareka', label: '140 — Sandareka (Officer) / 140 — සඳරේකා (නිලධාරී)' },
+      { username: 'chathurika', label: '137 — Chathurika (Officer) / 137 — චතුරිකා (නිලධාරී)' },
+      { username: 'prabhamili', label: '205 — Prabhamili (Officer) / 205 — ප්‍රභාමිලි (නිලධාරී)' },
     ],
   },
   head: {
@@ -28,7 +28,7 @@ const ROLE_GROUPS = {
     badge: 'View-only (All Letters & Dashboards) / බැලීම පමණි (සියලු ලිපි හා පුවරු)',
     badgeClass: 'badge-head',
     users: [
-      { username: 'hod', label: '152 — Head of Department' },
+      { username: 'hod', label: '152 — Head of Department / 152 — දෙපාර්තමේන්තු ප්‍රධානියා' },
     ],
   },
   secretary: {
@@ -36,12 +36,12 @@ const ROLE_GROUPS = {
     badge: 'Category-Specific View & Reply Only / කාණ්ඩයට සීමිත බැලීම හා පිළිතුරු පමණි',
     badgeClass: 'badge-secretary',
     users: [
-      { username: 'sec-admin', label: 'Addl. Sec. (Administration)' },
-      { username: 'sec-dev', label: 'Addl. Sec. (Development)' },
-      { username: 'sec-eng', label: 'Addl. Sec. (Engineering)' },
-      { username: 'sec-slacs', label: 'Addl. Sec. (SLAcS - Special)' },
-      { username: 'sec-slps', label: 'Addl. Sec. (SLPS - Special)' },
-      { username: 'sec-special', label: 'Addl. Sec. (Special Projects)' },
+      { username: 'sec-admin', label: 'Addl. Sec. (Administration) / අති. ලේක. (පරිපාලන)' },
+      { username: 'sec-dev', label: 'Addl. Sec. (Development) / අති. ලේක. (සංවර්ධන)' },
+      { username: 'sec-eng', label: 'Addl. Sec. (Engineering) / අති. ලේක. (ඉංජිනේරු)' },
+      { username: 'sec-slacs', label: 'Addl. Sec. (SLAcS - Special) / අති. ලේක. (විශේෂ)' },
+      { username: 'sec-slps', label: 'Addl. Sec. (SLPS - Special) / අති. ලේක. (විශේෂ ව්‍යාපෘති)' },
+      { username: 'sec-special', label: 'Addl. Sec. (Special Projects) / අති. ලේක. (විශේෂ ව්‍යාපෘති)' },
     ],
   },
   admin: {
@@ -49,7 +49,7 @@ const ROLE_GROUPS = {
     badge: 'User Administration Only / පරිශීලක පරිපාලනය පමණි',
     badgeClass: 'badge-admin',
     users: [
-      { username: 'admin', label: 'admin — System Admin' },
+      { username: 'admin', label: 'admin — System Admin / පද්ධති පරිපාලක' },
     ],
   },
 };
@@ -80,9 +80,9 @@ export default function LoginPage() {
       if (user.role === 'admin') navigate('/users');
       else if (user.role === 'secretary') navigate('/secretary-inbox');
       else navigate('/dashboard');
-      showToast('Welcome to RLMS');
+      showToast(t('Welcome to RLMS', 'RLMS වෙත සාදරයෙන් පිළිගනිමු'));
     } catch (err) {
-      showToast(err.response?.data?.message || 'Login failed', 'error');
+      showToast(err.response?.data?.message || t('Login failed', 'පිවිසීම අසාර්ථකයි'), 'error');
     } finally {
       setLoading(false);
     }
@@ -107,12 +107,12 @@ export default function LoginPage() {
             className={`btn btn-outline btn-sm ${lang === 'si' ? 'active' : ''}`}
             onClick={() => setLang('si')}
           >
-            SI
+            සි
           </button>
         </div>
         <div className="login-header">
-          <h1 className="login-title">ලංකා දුම්රිය දෙපාර්තමේන්තුව</h1>
-          <h2 className="login-subtitle">SRI LANKA RAILWAYS</h2>
+          <h1 className="login-title">{t('Sri Lanka Railways Department', 'ලංකා දුම්රිය දෙපාර්තමේන්තුව')}</h1>
+          <h2 className="login-subtitle">{t('SRI LANKA RAILWAYS', 'ශ්‍රී ලංකා දුම්රිය')}</h2>
           <div className="login-divider" />
           <p className="login-app-name">{t('Letter Management System (RLMS)', 'ලිපි කළමනාකරණ පද්ධතිය (RLMS)')}</p>
         </div>
@@ -137,9 +137,9 @@ export default function LoginPage() {
             </div>
 
             <div className="group-select-pane active">
-              <select value={username} onChange={(e) => setUsername(e.target.value)}>
+              <select key={`${activeRole}-${lang}`} value={username} onChange={(e) => setUsername(e.target.value)}>
                 {group.users.map((u) => (
-                  <option key={u.username} value={u.username}>{u.label}</option>
+                  <option key={`${u.username}-${lang}`} value={u.username}>{pick(u.label)}</option>
                 ))}
               </select>
             </div>
@@ -147,7 +147,7 @@ export default function LoginPage() {
 
           <div className="form-field password-field">
             <label className="field-label" htmlFor="password-input">
-              {pick('SIMULATED CREDENTIALS / මුරපදය')}
+              {pick('Password / මුරපදය')}
             </label>
             <div className="input-wrapper">
               <input

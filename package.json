@@ -5,14 +5,19 @@
   "private": true,
   "scripts": {
     "install-all": "npm install && cd server && npm install && cd ../client && npm install",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "predev": "npm run stop:server && lsof -ti :5173 | xargs kill -9 2>/dev/null; lsof -ti :5174 | xargs kill -9 2>/dev/null; true",
+    "preserver": "npm run stop:server",
+    "stop:server": "lsof -ti :5001 | xargs kill -9 2>/dev/null; pkill -f 'mongodb-binaries/mongod.*server/.memory-db/rlms' 2>/dev/null; pkill -f 'server/.memory-db/rlms' 2>/dev/null; pkill -f 'railway-letter-system/server/node_modules/.bin/nodemon' 2>/dev/null; sleep 1; rm -f server/.memory-db/rlms/mongod.lock 2>/dev/null; true",
+    "dev": "concurrently \"npm run server\" \"npm run client:wait\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm run dev",
+    "client:wait": "wait-on -t 60000 http://127.0.0.1:5001/api/health && npm run client",
     "seed": "cd server && npm run seed",
     "build": "cd client && npm run build",
     "start": "cd server && npm start"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "wait-on": "^8.0.1"
   }
 }

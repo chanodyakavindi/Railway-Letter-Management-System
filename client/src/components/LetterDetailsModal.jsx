@@ -2,8 +2,10 @@ import Modal from './Modal';
 import StatusBadge from './StatusBadge';
 import { formatDate, formatDateTime, downloadWithAuth } from '../utils/helpers';
 import { lettersApi } from '../api';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function LetterDetailsModal({ letter, open, onClose, onReply }) {
+  const { pick, t } = useLanguage();
   if (!letter) return null;
 
   const downloadPdf = async () => {
@@ -22,67 +24,67 @@ export default function LetterDetailsModal({ letter, open, onClose, onReply }) {
     <Modal
       open={open}
       onClose={onClose}
-      title="Correspondence Details / ලිපි විස්තර"
+      title={pick('Correspondence Details / ලිපි විස්තර')}
       subtitle={letter.letterId}
       wide
-      footer={<button type="button" className="btn btn-secondary" onClick={onClose}>Close / වසන්න</button>}
+      footer={<button type="button" className="btn btn-secondary" onClick={onClose}>{pick('Close / වසන්න')}</button>}
     >
       <div className="modal-bilingual-split-grid">
         <div className="meta-field">
-          <span className="meta-label">Date Received / ලිපි භාරගත් දිනය</span>
+          <span className="meta-label">{pick('Date Received / ලිපි භාරගත් දිනය')}</span>
           <div className="meta-val">{formatDate(letter.dateReceived)}</div>
         </div>
         <div className="meta-field">
-          <span className="meta-label">Referring Organization / ආයතනය</span>
+          <span className="meta-label">{pick('Referring Organization / ආයතනය')}</span>
           <div className="meta-val">{letter.referredEntity || '-'}</div>
         </div>
         <div className="meta-field">
-          <span className="meta-label">Letter Number / ලිපි අංකය</span>
+          <span className="meta-label">{pick('Letter Number / ලිපි අංකය')}</span>
           <div className="meta-val">{letter.letterNumber || '-'}</div>
         </div>
         <div className="meta-field">
-          <span className="meta-label">File Number / ගොනු අංකය</span>
+          <span className="meta-label">{pick('File Number / ගොනු අංකය')}</span>
           <div className="meta-val">{letter.fileNumber || '-'}</div>
         </div>
         <div className="meta-field field-span-full">
-          <span className="meta-label">Subject / මාතෘකාව</span>
+          <span className="meta-label">{pick('Subject / මාතෘකාව')}</span>
           <div className="meta-val highlight-box">{letter.title}</div>
         </div>
         <div className="meta-field field-span-full">
-          <span className="meta-label">Action Taken / ක්‍රියාමාර්ග</span>
+          <span className="meta-label">{pick('Action Taken / ක්‍රියාමාර්ග')}</span>
           <div className="meta-val">{letter.actionTaken || '-'}</div>
         </div>
         <div className="meta-field">
-          <span className="meta-label">Status / තත්වය</span>
+          <span className="meta-label">{pick('Status / තත්වය')}</span>
           <div className="meta-val"><StatusBadge status={letter.status} reminderStatus={letter.reminderStatus} /></div>
         </div>
         <div className="meta-field">
-          <span className="meta-label">Reminder / මතක් කිරීම</span>
+          <span className="meta-label">{pick('Reminder / මතක් කිරීම')}</span>
           <div className="meta-val">{formatDate(letter.reminderDate)}</div>
         </div>
         <div className="meta-field">
-          <span className="meta-label">Send To / ඉදිරිපත් කළේ</span>
+          <span className="meta-label">{pick('Send To / ඉදිරිපත් කළේ')}</span>
           <div className="pills-list-inline">
             {(letter.sendTo || []).map((s) => <span key={s} className="inline-badge">{s}</span>)}
           </div>
         </div>
         <div className="meta-field">
-          <span className="meta-label">Copies / පිටපත්</span>
+          <span className="meta-label">{pick('Copies / පිටපත්')}</span>
           <div className="pills-list-inline">
             {(letter.sendCopiesTo || []).map((s) => <span key={s} className="inline-badge">{s}</span>)}
           </div>
         </div>
         {letter.customRecipientName && (
           <div className="meta-field field-span-full">
-            <span className="meta-label">Other Recipient / වෙනත්</span>
+            <span className="meta-label">{pick('Other Recipient / වෙනත්')}</span>
             <div className="meta-val">{letter.customRecipientName}</div>
           </div>
         )}
         {letter.pdfAttachment?.originalName && (
           <div className="meta-field field-span-full">
-            <span className="meta-label">PDF Attachment</span>
+            <span className="meta-label">{t('PDF Attachment', 'PDF අමුණුම')}</span>
             <button type="button" className="btn btn-outline btn-sm" onClick={downloadPdf}>
-              Download {letter.pdfAttachment.originalName}
+              {t('Download', 'බාගත කරන්න')} {letter.pdfAttachment.originalName}
             </button>
           </div>
         )}
@@ -90,11 +92,11 @@ export default function LetterDetailsModal({ letter, open, onClose, onReply }) {
 
       {letter.replies?.length > 0 && (
         <div className="replies-section">
-          <h4>Replies / පිළිතුරු</h4>
+          <h4>{pick('Replies / පිළිතුරු')}</h4>
           <div className="replies-timeline">
             {letter.replies.map((r) => (
               <div key={r._id} className="reply-item">
-                <strong>{r.user?.fullName || 'User'}</strong>
+                <strong>{r.user?.fullName || t('User', 'පරිශීලක')}</strong>
                 <span className="reply-date">{formatDateTime(r.createdAt)}</span>
                 <p>{r.note}</p>
               </div>
@@ -105,7 +107,7 @@ export default function LetterDetailsModal({ letter, open, onClose, onReply }) {
 
       {onReply && (
         <div className="modal-footer-inline">
-          <button type="button" className="btn btn-primary" onClick={() => onReply(letter)}>Reply / පිළිතුර</button>
+          <button type="button" className="btn btn-primary" onClick={() => onReply(letter)}>{pick('Reply / පිළිතුර')}</button>
         </div>
       )}
     </Modal>

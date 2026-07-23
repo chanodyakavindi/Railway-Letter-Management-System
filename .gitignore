@@ -5,6 +5,7 @@ build/
 server/.env
 server/uploads/*
 !server/uploads/.gitkeep
+server/.memory-db/
 .DS_Store
 *.log
 public/

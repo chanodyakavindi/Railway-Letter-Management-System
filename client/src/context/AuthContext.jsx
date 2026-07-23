@@ -24,10 +24,12 @@ export function AuthProvider({ children }) {
       const { data } = await authApi.me();
       setUser(data.user);
       localStorage.setItem('rlms_user', JSON.stringify(data.user));
-    } catch {
-      localStorage.removeItem('rlms_token');
-      localStorage.removeItem('rlms_user');
-      setUser(null);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('rlms_token');
+        localStorage.removeItem('rlms_user');
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }

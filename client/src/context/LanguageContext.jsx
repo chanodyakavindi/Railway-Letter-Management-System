@@ -15,11 +15,26 @@ export function LanguageProvider({ children }) {
     document.documentElement.setAttribute('lang', lang === 'si' ? 'si' : 'en');
 
     const root = document.getElementById('root');
-    localizeDom(root, lang);
+    let rafId = 0;
+    let rafId2 = 0;
 
-    const observer = new MutationObserver(() => {
+    // Run after React paints so late-mounted UI (post-login) is included.
+    const applyLanguage = () => {
       localizeDom(root, lang);
-    });
+    };
+
+    const scheduleApply = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (rafId2) cancelAnimationFrame(rafId2);
+      rafId = requestAnimationFrame(() => {
+        rafId2 = requestAnimationFrame(applyLanguage);
+      });
+    };
+
+    applyLanguage();
+    scheduleApply();
+
+    const observer = new MutationObserver(scheduleApply);
 
     if (root) {
       observer.observe(root, {
@@ -31,7 +46,11 @@ export function LanguageProvider({ children }) {
       });
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+      if (rafId2) cancelAnimationFrame(rafId2);
+    };
   }, [lang]);
 
   const value = useMemo(

@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { displayUserName } from '../utils/i18n';
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard / පුවරුව', roles: ['head', 'officer', 'secretary'] },
@@ -27,8 +28,8 @@ export default function Sidebar({ reminderCount, onLogout }) {
   const toggleTheme = () => setDark((d) => !d);
 
   const { user, hasRole } = useAuth();
-  const { pick, t } = useLanguage();
-  const initial = user?.fullName?.charAt(0) || 'U';
+  const { pick, t, lang } = useLanguage();
+  const initial = (displayUserName(user, lang) || 'U').charAt(0);
 
   const roleLabel = {
     admin: t('System Admin', 'පද්ධති පරිපාලක'),
@@ -42,14 +43,16 @@ export default function Sidebar({ reminderCount, onLogout }) {
       <div className="sidebar-brand">
         <div className="brand-icon">🚂</div>
         <div className="brand-texts">
-          <span className="brand-main">RAILWAY LETTER MANAGEMENT<br />SYSTEM</span>
+          <span className="brand-main">
+            {t('RAILWAY LETTER MANAGEMENT SYSTEM', 'දුම්රිය ලිපි කළමනාකරණ පද්ධතිය')}
+          </span>
         </div>
       </div>
 
       <div className="current-user-card">
         <div className="user-avatar-circle">{initial}</div>
         <div className="user-details">
-          <div className="user-name-display">{user?.fullName}</div>
+          <div className="user-name-display">{displayUserName(user, lang)}</div>
           <div className="user-role-display">{roleLabel}</div>
         </div>
       </div>

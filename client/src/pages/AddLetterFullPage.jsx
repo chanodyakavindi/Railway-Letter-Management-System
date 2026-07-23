@@ -5,6 +5,7 @@ import MultiSelect from '../components/MultiSelect';
 import Loading from '../components/Loading';
 import { lettersApi } from '../api';
 import { useToast } from '../context/ToastContext';
+import { useLanguage } from '../context/LanguageContext';
 import { buildLetterFormData } from '../utils/helpers';
 
 /* =====================================================================
@@ -24,6 +25,7 @@ const SIGNATURE_OPTIONS = [
 export default function AddLetterFullPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const { t } = useLanguage();
   const replyId = params.get("reply");
   const editId = params.get('edit');
   const replyFromId = params.get('replyFrom');
@@ -413,15 +415,11 @@ useEffect(() => {
               {/* TAB-SPECIFIC TITLES */}
               {activeTab === "add" ? (
                 <>
-                  {/* ADD LETTER — Form heading (Sinhala + English) */}
-                  <h2>ලිපි ලියාපදිංචි කිරීමේ ආකෘතිය</h2>
-                  <h3>Register Incoming Letter Form</h3>
+                  <h2>{t('Register Incoming Letter Form', 'ලිපි ලියාපදිංචි කිරීමේ ආකෘතිය')}</h2>
                 </>
               ) : (
                 <>
-                  {/* REPLY TO LETTER — Form heading (Sinhala + English) */}
-                  <h2>පිළිතුරු ලිපි ආකෘතිය</h2>
-                  <h3>Reply Letter Form</h3>
+                  <h2>{t('Reply Letter Form', 'පිළිතුරු ලිපි ආකෘතිය')}</h2>
                 </>
               )}
             </div>
@@ -429,10 +427,10 @@ useEffect(() => {
 
 {
     editId
-        ? "Edit Entry"
+        ? t('Edit Entry', 'ඇතුළත් කිරීම සංස්කරණය')
         : activeTab === "add"
-        ? "New Letter"
-        : "New Reply"
+        ? t('New Letter', 'නව ලිපිය')
+        : t('New Reply', 'නව පිළිතුර')
 }
 
 </span>
@@ -447,41 +445,41 @@ useEffect(() => {
           {activeTab === 'add' ? (
             <div className="form-grid">
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Date Received *</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Date Received * / ලිපි භාරගත් දිනය *</span></label>
                 <input type="date" value={incomingForm.dateReceived} onChange={(e) => setIncoming('dateReceived', e.target.value)} required />
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Referring Organization / Institution *</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Referring Organization / Institution * / යොමු කළ ආයතනය *</span></label>
                 <input type="text" value={incomingForm.referredEntity} onChange={(e) => setIncoming('referredEntity', e.target.value)} required />
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Letter Number *</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Letter Number * / ලිපි අංකය *</span></label>
                 <input type="text" value={incomingForm.letterNumber} onChange={(e) => setIncoming('letterNumber', e.target.value)} required />
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Subject of the Letter *</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Subject of the Letter * / ලිපියේ මාතෘකාව *</span></label>
                 <input type="text" value={incomingForm.title} onChange={(e) => setIncoming('title', e.target.value)} required />
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">File Number</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">File Number / ගොනු අංකය</span></label>
                 <input type="text" value={incomingForm.fileNumber} onChange={(e) => setIncoming('fileNumber', e.target.value)} />
               </div>
 
               <div className="form-field-group field-span-full">
-                <label className="bilingual-label"><span className="eng-lbl">Document Upload</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Document Upload / ලේඛන උඩුගත කිරීම</span></label>
                 <div className="file-uploader-box">
                   <input type="file" accpt=".pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => setIncomingFile(e.target.files[0])} />
-                  <label htmlFor="file" style={{fontSize: "14px",fontWeight: "600",color: "#333",marginBottom: "8px",display: "block"}}>Upload PDF</label>
+                  <label htmlFor="file" style={{fontSize: "14px",fontWeight: "600",color: "#333",marginBottom: "8px",display: "block"}}>{t('Upload PDF', 'PDF උඩුගත කරන්න')}</label>
                   {incomingFile && <span className="pdf-name">{incomingFile.name}</span>}
                 </div>
               </div>
 
               {/* <div className="form-field-group field-span-full">
-                <label className="bilingual-label"><span className="eng-lbl">Scan Upload</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Scan Upload / ස්කෑන් උඩුගත කිරීම</span></label>
                 <div className="file-uploader-box">
                   <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" onChange={(e) => setIncomingScanFile(e.target.files[0])} />
                   {incomingScanFile && <span className="pdf-name">{incomingScanFile.name}</span>}
@@ -493,7 +491,7 @@ useEffect(() => {
               {replySource && (
                 <div className="card" style={{ marginBottom: 16 }}>
                   <div className="card-header">
-                    <h3>Reply Source Letter</h3>
+                    <h3>{t('Reply Source Letter', 'පිළිතුරු මුල් ලිපිය')}</h3>
                     <span>{replySource.letterId}</span>
                   </div>
                   <div className="modal-bilingual-split-grid">
@@ -535,12 +533,12 @@ useEffect(() => {
 
             <div className="form-grid">
               <div className="form-field-group field-span-full">
-                <label className="bilingual-label"><span className="eng-lbl">Action Taken on the Letter</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Action Taken on the Letter / ලිපිය මත ගත් ක්‍රියාමාර්ග</span></label>
                 <textarea rows={2} value={replyForm.actionTaken} onChange={(e) => setReply('actionTaken', e.target.value)} />
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Signature / Approval / Instructions</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Signature / Approval / Instructions / අත්සන / අනුමැතිය / උපදෙස්</span></label>
                 <select value={replyForm.signatureStatus} onChange={(e) => setReply('signatureStatus', e.target.value)}>
                   <option value="">-- Select --</option>
                   {SIGNATURE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
@@ -548,27 +546,27 @@ useEffect(() => {
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Date File Forwarded</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Date File Forwarded / ගොනුව යොමු කළ දිනය</span></label>
                 <input type="date" value={replyForm.dateFileTransferred} onChange={(e) => setReply('dateFileTransferred', e.target.value)} />
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Date File Received</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Date File Received / ගොනුව ලැබුණු දිනය</span></label>
                 <input type="date" value={replyForm.dateFileReceived} onChange={(e) => setReply('dateFileReceived', e.target.value)} />
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Date Signed (Letter Date)</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Date Signed (Letter Date) / අත්සන් කළ දිනය (ලිපි දිනය)</span></label>
                 <input type="date" value={replyForm.dateOfSignature} onChange={(e) => setReply('dateOfSignature', e.target.value)} />
               </div>
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Date Mailed / Posted</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Date Mailed / Posted / තැපැල් කළ දිනය</span></label>
                 <input type="date" value={replyForm.dateOfMailing} onChange={(e) => setReply('dateOfMailing', e.target.value)} />
               </div>
 
               <div className="form-field-group field-span-half">
-                <label className="bilingual-label"><span className="eng-lbl">Submitted By / Send By</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Submitted By / Send By / ඉදිරිපත් කළේ / යැවූවේ</span></label>
                 <MultiSelect
                   options={categories.map((c) => ({ value: c.value, label: c.label }))}
                   value={replyForm.sendTo}
@@ -578,7 +576,7 @@ useEffect(() => {
               </div>
 
               <div className="form-field-group field-span-half">
-                <label className="bilingual-label"><span className="eng-lbl">Send By Copies</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Send By Copies / පිටපත් යවන්න</span></label>
                 <MultiSelect
                   options={categories.map((c) => ({ value: c.value, label: c.label }))}
                   value={replyForm.sendCopiesTo}
@@ -589,27 +587,27 @@ useEffect(() => {
 
               {showOther && (
                 <div className="form-field-group field-span-full">
-                  <label className="bilingual-label"><span className="eng-lbl">Other Recipient Name</span></label>
+                  <label className="bilingual-label"><span className="eng-lbl">Other Recipient Name / වෙනත් ලාභියාගේ නම</span></label>
                   <input type="text" value={replyForm.customRecipientName} onChange={(e) => setReply('customRecipientName', e.target.value)} />
                 </div>
               )}
 
               <div className="form-field-group">
-                <label className="bilingual-label"><span className="eng-lbl">Reminder Date</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Reminder Date / මතක් කිරීමේ දිනය</span></label>
                 <input type="date" value={replyForm.reminderDate} onChange={(e) => setReply('reminderDate', e.target.value)} />
               </div>
 
               <div className="form-field-group field-span-full">
-                <label className="bilingual-label"><span className="eng-lbl">Document Upload</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Document Upload / ලේඛන උඩුගත කිරීම</span></label>
                 <div className="file-uploader-box">
                   <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => setReplyFile(e.target.files[0])} />
-                  <label htmlFor="file-uploader-box" style={{fontSize:"14px", fontWeight:"600",color: "#333",marginBottom: "8px",display: "block"}}>Upload PDF</label>
+                  <label htmlFor="file-uploader-box" style={{fontSize:"14px", fontWeight:"600",color: "#333",marginBottom: "8px",display: "block"}}>{t('Upload PDF', 'PDF උඩුගත කරන්න')}</label>
                   {replyFile && <span className="pdf-name">{replyFile.name}</span>}
                 </div>
               </div>
 
               {/* <div className="form-field-group field-span-full">
-                <label className="bilingual-label"><span className="eng-lbl">Scan Upload</span></label>
+                <label className="bilingual-label"><span className="eng-lbl">Scan Upload / ස්කෑන් උඩුගත කිරීම</span></label>
                 <div className="file-uploader-box">
                   <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" onChange={(e) => setReplyScanFile(e.target.files[0])} />
                   {replyScanFile && <span className="pdf-name">{replyScanFile.name}</span>}
@@ -629,10 +627,10 @@ useEffect(() => {
                   </button>
               ----------------------------------------------------------- */}
           <div className="form-action-footer">
-            <button type="button" className="btn btn-outline" onClick={() => navigate('/letters')}>Cancel</button>
+            <button type="button" className="btn btn-outline" onClick={() => navigate('/letters')}>{t('Cancel', 'අවලංගු කරන්න')}</button>
             <div className="submit-action-buttons">
-              <button type="button" className="btn btn-secondary" disabled={saving} onClick={() => save(true)}>Draft Stage</button>
-              <button type="button" className="btn btn-primary" disabled={saving} onClick={() => save(false)}>Submit & Register</button>
+              <button type="button" className="btn btn-secondary" disabled={saving} onClick={() => save(true)}>{t('Draft Stage', 'කෙටුම්පත් අවස්ථාව')}</button>
+              <button type="button" className="btn btn-primary" disabled={saving} onClick={() => save(false)}>{t('Submit & Register', 'ඉදිරිපත් කර ලියාපදිංචි කරන්න')}</button>
             </div>
           </div>
 
