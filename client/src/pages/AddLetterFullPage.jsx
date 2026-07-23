@@ -24,7 +24,10 @@ const SIGNATURE_OPTIONS = [
 export default function AddLetterFullPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const replyId = params.get("reply");
   const editId = params.get('edit');
+  const replyFromId = params.get('replyFrom');
+  const initialTab = params.get('tab') === 'reply' ? 'reply' : 'add';
   const { showToast } = useToast();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(!!editId);
@@ -39,11 +42,13 @@ export default function AddLetterFullPage() {
          {activeTab === "add" && ( ... )}
          {activeTab === "reply" && ( ... )}
      =================================================================== */
-  const [activeTab, setActiveTab] = useState("add");
+  const [activeTab, setActiveTab] = useState(initialTab);
+  const [replySource, setReplySource] = useState(null);
 
   const [incomingFile, setIncomingFile] = useState(null);
   const [incomingScanFile, setIncomingScanFile] = useState(null);
   const [replyFile, setReplyFile] = useState(null);
+  const [replyScanFile, setReplyScanFile] = useState(null);
 
   /* ===================================================================
      FORM STATE (SEPARATE PARTS)
@@ -87,6 +92,120 @@ const [replyForm, setReplyForm] = useState({
   useEffect(() => {
     lettersApi.categories().then(({ data }) => setCategories(data));
   }, []);
+ 
+  useEffect(() => {
+    if (initialTab === 'reply') {
+      setActiveTab('reply');
+    }
+  }, [initialTab]);
+
+  // NEW CHANGE: Load original letter details when Reply button is clicked
+useEffect(() => {
+
+  if (!replyId) return;
+
+
+  const loadReplyLetter = async () => {
+
+    try {
+
+      const { data } = await lettersApi.get(replyId);
+
+
+      // NEW CHANGE: Switch automatically to Reply tab
+      setActiveTab("reply");
+
+
+      // NEW CHANGE: Store original letter details for display
+      setReplySource(data);
+
+
+      // NEW CHANGE: Fill reply-related fields from original letter
+      setReplyForm((prev)=>({
+
+        ...prev,
+
+        presentedTo: data.referredEntity || "",
+
+        sendTo: data.sendTo || [],
+
+        sendCopiesTo: data.sendCopiesTo || [],
+
+        dateFileReceived:
+          data.dateReceived?.split("T")[0] || "",
+
+      }));
+
+
+      // NEW CHANGE: Fill incoming form data because reply depends on original letter
+      setIncomingForm({
+
+        dateReceived:
+          data.dateReceived?.split("T")[0] || "",
+
+        referredEntity:
+          data.referredEntity || "",
+
+        letterNumber:
+          data.letterNumber || "",
+
+        letterDate:
+          data.letterDate?.split("T")[0] || "",
+
+        title:
+          data.title || "",
+
+        fileNumber:
+          data.fileNumber || "",
+
+      });
+
+
+    } catch(err){
+
+      console.error(err);
+
+    }
+
+  };
+
+
+  loadReplyLetter();
+
+
+},[replyId]);
+  useEffect(() => {
+    if (!replyFromId) {
+      setReplySource(null);
+      return;
+    }
+
+    setLoading(true);
+    lettersApi.get(replyFromId)
+      .then(({ data }) => {
+        setReplySource(data);
+        setActiveTab('reply');
+        setIncomingForm({
+          dateReceived: data.dateReceived?.split('T')[0] || new Date().toISOString().split('T')[0],
+          referredEntity: data.referredEntity || '',
+          letterNumber: data.letterNumber || '',
+          letterDate: data.letterDate?.split('T')[0] || '',
+          title: data.title || '',
+          fileNumber: data.fileNumber || '',
+        });
+        setReplyForm((prev) => ({
+          ...prev,
+          actionTaken: prev.actionTaken || `Reply to ${data.letterId}`,
+          presentedTo: data.referredEntity || '',
+          dateFileReceived: data.dateReceived?.split('T')[0] || '',
+          sendTo: data.sendTo || [],
+          sendCopiesTo: data.sendCopiesTo || [],
+          customRecipientName: data.customRecipientName || '',
+          reminderDate: data.reminderDate?.split('T')[0] || '',
+        }));
+      })
+      .finally(() => setLoading(false));
+  }, [replyFromId]);
 
   /* ===================================================================
      LOAD EXISTING LETTER FOR EDITING
@@ -171,25 +290,34 @@ const [replyForm, setReplyForm] = useState({
         payload = { ...incomingForm, status: asDraft ? 'Draft' : 'Completed', sourceType: 'letter' };
       } else {
         const today = new Date().toISOString().split('T')[0];
-        const fallbackTitle = (replyForm.actionTaken || '').trim() || 'Reply Letter';
+        const fallbackTitle = replySource?.title || (replyForm.actionTaken || '').trim() || 'Reply Letter';
         payload = {
           ...replyForm,
           // /api/letters create requires title + dateReceived.
           // Keep reply mode compatible by providing sensible defaults.
           title: fallbackTitle,
-          dateReceived: incomingForm.dateReceived || today,
+          dateReceived: incomingForm.dateReceived || replySource?.dateReceived?.split('T')[0] || today,
+          referredEntity: replySource?.referredEntity || incomingForm.referredEntity || '',
+          letterNumber: replySource?.letterNumber || incomingForm.letterNumber || '',
+          letterDate: replySource?.letterDate?.split('T')[0] || incomingForm.letterDate || '',
+          fileNumber: replySource?.fileNumber || incomingForm.fileNumber || '',
           // Reply-flow items must stay pending until user explicitly completes from Reminders.
           status: 'Pending',
           sourceType: 'reply',
         };
       }
-      const fileToUpload = activeTab === 'reply' ? replyFile : (incomingScanFile || incomingFile);
+      const fileToUpload = activeTab === 'reply' ? (replyScanFile || replyFile) : (incomingScanFile || incomingFile);
       const fd = buildLetterFormData(payload, fileToUpload);
       if (editId) {
         await lettersApi.update(editId, fd);
         showToast('Letter updated');
       } else {
         await lettersApi.create(fd);
+
+        if (activeTab === 'reply' && !asDraft && replySource?._id) {
+          await lettersApi.updateStatus(replySource._id, { status: 'Completed' });
+        }
+
         showToast(asDraft ? 'Draft saved' : 'Letter registered');
       }
       navigate('/letters');
@@ -346,20 +474,65 @@ const [replyForm, setReplyForm] = useState({
               <div className="form-field-group field-span-full">
                 <label className="bilingual-label"><span className="eng-lbl">Document Upload</span></label>
                 <div className="file-uploader-box">
-                  <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => setIncomingFile(e.target.files[0])} />
+                  <input type="file" accpt=".pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => setIncomingFile(e.target.files[0])} />
+                  <label htmlFor="file" style={{fontSize: "14px",fontWeight: "600",color: "#333",marginBottom: "8px",display: "block"}}>Upload PDF</label>
                   {incomingFile && <span className="pdf-name">{incomingFile.name}</span>}
                 </div>
               </div>
 
-              <div className="form-field-group field-span-full">
+              {/* <div className="form-field-group field-span-full">
                 <label className="bilingual-label"><span className="eng-lbl">Scan Upload</span></label>
                 <div className="file-uploader-box">
                   <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" onChange={(e) => setIncomingScanFile(e.target.files[0])} />
                   {incomingScanFile && <span className="pdf-name">{incomingScanFile.name}</span>}
                 </div>
-              </div>
+              </div> */}
             </div>
           ) : (
+            <>
+              {replySource && (
+                <div className="card" style={{ marginBottom: 16 }}>
+                  <div className="card-header">
+                    <h3>Reply Source Letter</h3>
+                    <span>{replySource.letterId}</span>
+                  </div>
+                  <div className="modal-bilingual-split-grid">
+                    <div className="meta-field">
+                      <span className="meta-label">Date Received / ලිපි භාරගත් දිනය</span>
+                      <div className="meta-val">{replySource.dateReceived?.split('T')[0] || '-'}</div>
+                    </div>
+                    <div className="meta-field">
+                      <span className="meta-label">Referring Organization / ආයතනය</span>
+                      <div className="meta-val">{replySource.referredEntity || '-'}</div>
+                    </div>
+                    <div className="meta-field">
+                      <span className="meta-label">Letter Number / ලිපි අංකය</span>
+                      <div className="meta-val">{replySource.letterNumber || '-'}</div>
+                    </div>
+                    <div className="meta-field">
+                      <span className="meta-label">File Number / ගොනු අංකය</span>
+                      <div className="meta-val">{replySource.fileNumber || '-'}</div>
+                    </div>
+                    <div className="meta-field field-span-full">
+                      <span className="meta-label">Subject / මාතෘකාව</span>
+                      <div className="meta-val highlight-box">{replySource.title || '-'}</div>
+                    </div>
+                    <div className="meta-field">
+                      <span className="meta-label">Send To / ඉදිරිපත් කළේ</span>
+                      <div className="pills-list-inline">
+                        {(replySource.sendTo || []).map((s) => <span key={s} className="inline-badge">{s}</span>)}
+                      </div>
+                    </div>
+                    <div className="meta-field">
+                      <span className="meta-label">Copies / පිටපත්</span>
+                      <div className="pills-list-inline">
+                        {(replySource.sendCopiesTo || []).map((s) => <span key={s} className="inline-badge">{s}</span>)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             <div className="form-grid">
               <div className="form-field-group field-span-full">
                 <label className="bilingual-label"><span className="eng-lbl">Action Taken on the Letter</span></label>
@@ -400,7 +573,7 @@ const [replyForm, setReplyForm] = useState({
                   options={categories.map((c) => ({ value: c.value, label: c.label }))}
                   value={replyForm.sendTo}
                   onChange={(v) => setReply('sendTo', v)}
-                  placeholder="Select recipients"
+                  placeholder="Selected roles"
                 />
               </div>
 
@@ -410,7 +583,7 @@ const [replyForm, setReplyForm] = useState({
                   options={categories.map((c) => ({ value: c.value, label: c.label }))}
                   value={replyForm.sendCopiesTo}
                   onChange={(v) => setReply('sendCopiesTo', v)}
-                  placeholder="Select CC recipients"
+                  placeholder="Selected roles"
                 />
               </div>
 
@@ -430,10 +603,20 @@ const [replyForm, setReplyForm] = useState({
                 <label className="bilingual-label"><span className="eng-lbl">Document Upload</span></label>
                 <div className="file-uploader-box">
                   <input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.csv" onChange={(e) => setReplyFile(e.target.files[0])} />
+                  <label htmlFor="file-uploader-box" style={{fontSize:"14px", fontWeight:"600",color: "#333",marginBottom: "8px",display: "block"}}>Upload PDF</label>
                   {replyFile && <span className="pdf-name">{replyFile.name}</span>}
                 </div>
               </div>
+
+              {/* <div className="form-field-group field-span-full">
+                <label className="bilingual-label"><span className="eng-lbl">Scan Upload</span></label>
+                <div className="file-uploader-box">
+                  <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif" onChange={(e) => setReplyScanFile(e.target.files[0])} />
+                  {replyScanFile && <span className="pdf-name">{replyScanFile.name}</span>}
+                </div>
+              </div> */}
             </div>
+            </>
           )}
 
           {/* -----------------------------------------------------------
