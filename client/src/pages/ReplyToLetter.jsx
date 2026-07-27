@@ -1,36 +1,174 @@
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/Header';
-import MultiSelect from '../components/MultiSelect';
 import Loading from '../components/Loading';
 import { lettersApi } from '../api';
 import { useToast } from '../context/ToastContext';
-import { useLanguage } from '../context/LanguageContext';
 import { buildLetterFormData } from '../utils/helpers';
-import { useParams } from "react-router-dom";
 
 export default function ReplyToLetter() {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [letter, setLetter] = useState(null);
+  const [replyFile, setReplyFile] = useState(null);
+  const [form, setForm] = useState({
+    note: '',
+    completed: 'false',
+  });
+
+  useEffect(() => {
+    let active = true;
+
+    const loadLetter = async () => {
+      try {
+        setLoading(true);
+        const { data } = await lettersApi.get(id);
+        if (!active) return;
+        setLetter(data);
+      } catch (err) {
+        if (!active) return;
+        showToast(err.response?.data?.message || 'Unable to load letter', 'error');
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    loadLetter();
+
+    return () => {
+      active = false;
+    };
+  }, [id, showToast]);
+
+  const handleChange = (field, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      setSaving(true);
+      const payload = buildLetterFormData(
+        {
+          note: form.note,
+          completed: form.completed,
+        },
+        replyFile
+      );
+
+      await lettersApi.addReply(id, payload);
+      showToast('Reply saved successfully');
+      navigate('/secretary-inbox');
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Reply failed', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="content-body">
-      <h2>Reply Letter</h2>
+    <>
+      <Header title="Reply Letter / පිළිතුරු ලිපිය" />
 
-      <p>Letter Title: {location.state?.title}</p>
+      <div className="content-body">
+        {loading ? (
+          <Loading />
+        ) : (
+          <div className="reply-letter-stack">
+            <section className="card form-container-card">
+              <div className="card-header">
+                <h3>Source Letter</h3>
+                <p>Review the original letter before sending the reply</p>
+              </div>
 
-      <div className="form-field-group">
-        <label>Reply</label>
+              <div className="form-grid">
+                <div className="form-field-group">
+                  <label className="bilingual-label">
+                    <span className="eng-lbl">Letter Number / ලිපි අංකය</span>
+                  </label>
+                  <input type="text" value={letter?.letterNumber || '-'} readOnly />
+                </div>
 
-        <textarea
-          rows="8"
-          placeholder="Type your reply..."
-        />
+                <div className="form-field-group">
+                  <label className="bilingual-label">
+                    <span className="eng-lbl">Received Date / ලිපි භාරගත් දිනය</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={letter?.dateReceived ? String(letter.dateReceived).split('T')[0] : '-'}
+                    readOnly
+                  />
+                </div>
+
+                <div className="form-field-group field-span-full">
+                  <label className="bilingual-label">
+                    <span className="eng-lbl">Subject / මාතෘකාව</span>
+                  </label>
+                  <input type="text" value={letter?.title || location.state?.title || '-'} readOnly />
+                </div>
+              </div>
+            </section>
+
+            <section className="card form-container-card">
+              <div className="form-header-bar">
+                <div className="form-header-titles">
+                  <h2>Reply Details</h2>
+                  <h3>Enter the reply note and attach supporting documents</h3>
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                <div className="form-grid">
+                  <div className="form-field-group">
+                    <label className="bilingual-label">
+                      <span className="eng-lbl">Attachment / අමුණා ඇති ගොනුව</span>
+                    </label>
+                    <input
+                      type="file"
+                      className="file-upload"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
+                      onChange={(e) => setReplyFile(e.target.files?.[0] || null)}
+                    />
+                  </div>
+
+                  <div className="form-field-group field-span-full">
+                    <label className="bilingual-label">
+                      <span className="eng-lbl">Reply Note / පිළිතුරු සටහන</span>
+                    </label>
+                    <textarea
+                      rows="8"
+                      value={form.note}
+                      onChange={(e) => handleChange('note', e.target.value)}
+                      placeholder="Type your reply here..."
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-action-footer">
+                  <button type="button" className="btn btn-outline" onClick={() => navigate('/secretary-inbox')}>
+                    Cancel
+                  </button>
+                  <div className="submit-action-buttons">
+                    <button type="submit" className="btn btn-primary" disabled={saving}>
+                      {saving ? 'Submitting...' : 'Submit Reply'}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </section>
+          </div>
+        )}
       </div>
-
-      <button className="btn btn-primary">
-        Submit Reply
-      </button>
-    </div>
+    </>
   );
 }

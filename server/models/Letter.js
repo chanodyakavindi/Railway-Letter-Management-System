@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const attachmentSchema = new mongoose.Schema(
   {
     filename: String,
-    originalName: String,
+    originalName: String, 
     mimeType: String,
     size: Number,
     uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

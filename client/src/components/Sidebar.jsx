@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { displayUserName } from '../utils/i18n';
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard / පුවරුව', roles: ['head', 'officer', 'secretary'] },
+  { to: '/dashboard', label: 'Dashboard / පුවරුව', roles: ['head', 'officer'] },
   { to: '/add-letter', label: 'Add Letter / ලිපියක් එක් කරන්න', roles: ['officer'] },
   { to: '/letters', label: 'All Letters / සියලු ලිපි', roles: ['head', 'officer'] },
   { to: '/secretary-inbox', label: 'Secretary Inbox / ලේකම් එන ලිපි', roles: ['secretary'] },
