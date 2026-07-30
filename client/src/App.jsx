@@ -16,6 +16,7 @@ import ExportReportPage from './pages/ExportReportPage';
 import UserManagementPage from './pages/UserManagementPage';
 import SecretaryInboxPage from './pages/SecretaryInboxPage';
 import NotificationsPage from './pages/NotificationsPage';
+import ReplyToLetter from "./pages/ReplyToLetter";
 import Loading from './components/Loading';
 import { LanguageProvider } from './context/LanguageContext';
 import './assets/styles.css';
@@ -52,6 +53,7 @@ export default function App() {
                 <Route path="users" element={<RoleRoute roles={['admin']}><UserManagementPage /></RoleRoute>} />
                 <Route path="secretary-inbox" element={<RoleRoute roles={['secretary']}><SecretaryInboxPage /></RoleRoute>} />
                 <Route path="notifications" element={<RoleRoute roles={['head', 'officer', 'secretary']}><NotificationsPage /></RoleRoute>} />
+                <Route path="replytoletter/:id" element={<ReplyToLetter />} />
               </Route>
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

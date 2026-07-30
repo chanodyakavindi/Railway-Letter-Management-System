@@ -47,9 +47,11 @@ export default function SecretaryInboxPage() {
     }
   };
 
-  const openReplyForm = (letter) => {
-    navigate(`/add-letter?tab=reply&replyFrom=${letter._id}`);
-  };
+const openReplyForm = (letter) => {
+  navigate(`/replytoletter/${letter._id}`, {
+    state: { title: letter.title }
+  });
+};
 
   return (
     <>

@@ -1012,6 +1012,11 @@ input, select, textarea, button {
  gap: 6px;
 }
 
+.reply-letter-stack {
+ display: grid;
+ gap: 20px;
+}
+
 .field-span-full {
  grid-column: 1 / -1;
 }
@@ -1071,6 +1076,21 @@ input, select, textarea, button {
 .form-field-group textarea:disabled {
  opacity: 0.5;
  cursor: not-allowed;
+}
+
+.file-upload {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.file-upload:focus {
+  border-color: var(--railway-gold);
+  box-shadow: 0 0 0 1px var(--railway-gold-soft);
+  outline: none;
 }
 
 .form-sub-header {
