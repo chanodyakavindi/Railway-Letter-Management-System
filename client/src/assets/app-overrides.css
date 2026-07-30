@@ -1586,6 +1586,30 @@ html[lang="si"] .login-page .login-subtitle {
   margin-bottom: 18px;
 }
 
+.login-page .login-text-field {
+  margin-bottom: 14px;
+}
+
+.login-page .login-text-field .input-wrapper {
+  display: block;
+}
+
+.login-page .login-text-field input {
+  width: 100%;
+  padding: 11px 12px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  letter-spacing: normal;
+}
+
+.login-page .login-text-field input:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.12);
+  outline: none;
+}
+
 .login-page .password-field .input-wrapper {
   display: block;
 }

@@ -21,6 +21,9 @@ export default function ReplyToLetter() {
     completed: 'false',
   });
 
+  const [note, setNote] = useState("");
+  const [file, setFile] = useState(null);
+
   useEffect(() => {
     let active = true;
 
@@ -64,6 +67,14 @@ export default function ReplyToLetter() {
         },
         replyFile
       );
+
+      const formData = new FormData();
+
+      formData.append("note", note);
+
+      if(file){
+          formData.append("attachment", file);
+      }
 
       await lettersApi.addReply(id, payload);
       showToast('Reply saved successfully');
@@ -136,7 +147,7 @@ export default function ReplyToLetter() {
                       type="file"
                       className="file-upload"
                       accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
-                      onChange={(e) => setReplyFile(e.target.files?.[0] || null)}
+                      onChange={(e)=>setFile(e.target.files[0])}
                     />
                   </div>
 
@@ -146,8 +157,8 @@ export default function ReplyToLetter() {
                     </label>
                     <textarea
                       rows="8"
-                      value={form.note}
-                      onChange={(e) => handleChange('note', e.target.value)}
+                      value={note}
+                      onChange={(e)=>setNote(e.target.value)}
                       placeholder="Type your reply here..."
                       required
                     />
