@@ -15,13 +15,7 @@ export default function ReplyToLetter() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [letter, setLetter] = useState(null);
-  const [replyFile, setReplyFile] = useState(null);
-  const [form, setForm] = useState({
-    note: '',
-    completed: 'false',
-  });
-
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState('');
   const [file, setFile] = useState(null);
 
   useEffect(() => {
@@ -48,33 +42,15 @@ export default function ReplyToLetter() {
     };
   }, [id, showToast]);
 
-  const handleChange = (field, value) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       setSaving(true);
-      const payload = buildLetterFormData(
-        {
-          note: form.note,
-          completed: form.completed,
-        },
-        replyFile
-      );
-
-      const formData = new FormData();
-
-      formData.append("note", note);
-
-      if(file){
-          formData.append("attachment", file);
-      }
+      const payload = buildLetterFormData({
+        note: note.trim(),
+        completed: 'false',
+      }, file);
 
       await lettersApi.addReply(id, payload);
       showToast('Reply saved successfully');
@@ -147,7 +123,7 @@ export default function ReplyToLetter() {
                       type="file"
                       className="file-upload"
                       accept=".pdf,.doc,.docx,.xls,.xlsx,.csv"
-                      onChange={(e)=>setFile(e.target.files[0])}
+                      onChange={(e) => setFile(e.target.files[0] || null)}
                     />
                   </div>
 
@@ -158,7 +134,7 @@ export default function ReplyToLetter() {
                     <textarea
                       rows="8"
                       value={note}
-                      onChange={(e)=>setNote(e.target.value)}
+                      onChange={(e) => setNote(e.target.value)}
                       placeholder="Type your reply here..."
                       required
                     />
