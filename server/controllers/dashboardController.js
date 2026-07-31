@@ -4,8 +4,7 @@ const User = require('../models/User');
 const { buildLetterFilter } = require('../middleware/rbac');
 const { startOfDay, endOfDay, computeReminderStatus } = require('../utils/letterHelpers');
 
-function getPeriodRange(period) {
-  const now = new Date();
+function getPeriodRange(period, now = new Date()) {
   const start = startOfDay(now);
   let from = new Date(start);
 
@@ -20,13 +19,19 @@ function getPeriodRange(period) {
   return { from, to: endOfDay(now) };
 }
 
+function buildPeriodStatsFilter(baseFilter, period, now = new Date()) {
+  const { from, to } = getPeriodRange(period, now);
+  return {
+    ...baseFilter,
+    createdAt: { $gte: from, $lte: to },
+  };
+}
+
 exports.getStats = async (req, res, next) => {
   try {
     const { period = 'daily' } = req.query;
     const filter = buildLetterFilter(req.user, {});
-    const { from, to } = getPeriodRange(period);
-
-    const periodFilter = { ...filter, updatedAt: { $gte: from, $lte: to } };
+    const periodFilter = buildPeriodStatsFilter(filter, period);
 
     const [
       total,
@@ -37,14 +42,14 @@ exports.getStats = async (req, res, next) => {
       overdue,
       activeReminders,
     ] = await Promise.all([
-      Letter.countDocuments(filter),
-      Letter.countDocuments({ ...filter, status: 'Draft' }),
-      Letter.countDocuments({ ...filter, status: { $in: ['Pending', 'Overdue'] } }),
-      Letter.countDocuments({ ...filter, status: 'Completed' }),
-      Letter.countDocuments({ ...filter, status: 'NoAction' }),
-      Letter.countDocuments({ ...filter, status: 'Overdue' }),
+      Letter.countDocuments(periodFilter),
+      Letter.countDocuments({ ...periodFilter, status: 'Draft' }),
+      Letter.countDocuments({ ...periodFilter, status: { $in: ['Pending', 'Overdue'] } }),
+      Letter.countDocuments({ ...periodFilter, status: 'Completed' }),
+      Letter.countDocuments({ ...periodFilter, status: 'NoAction' }),
+      Letter.countDocuments({ ...periodFilter, status: 'Overdue' }),
       Letter.countDocuments({
-        ...filter,
+        ...periodFilter,
         status: { $nin: ['Completed', 'NoAction'] },
         reminderDate: { $exists: true, $ne: null },
       }),
@@ -126,6 +131,9 @@ exports.getDailySummary = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getPeriodRange = getPeriodRange;
+exports.buildPeriodStatsFilter = buildPeriodStatsFilter;
 
 exports.generateDailyNotifications = async () => {
   const today = startOfDay();
