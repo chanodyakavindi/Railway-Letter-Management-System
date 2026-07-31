@@ -159,14 +159,23 @@ exports.getUserTracking = async (req, res, next) => {
 };
 
 async function getUserLetterStats(userId) {
-  const uid = userId.toString();
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const todayFilter = {
+    createdBy: userId,
+    createdAt: { $gte: todayStart, $lte: todayEnd },
+  };
+
   const [completed, draft, pending, overdue, assigned, recent] = await Promise.all([
-    Letter.countDocuments({ createdBy: userId, status: 'Completed' }),
-    Letter.countDocuments({ createdBy: userId, status: 'Draft' }),
-    Letter.countDocuments({ createdBy: userId, status: { $in: ['Pending', 'Overdue'] } }),
-    Letter.countDocuments({ createdBy: userId, status: { $in: ['Overdue', 'NoAction'] } }),
-    Letter.countDocuments({ assignedUsers: userId }),
-    Letter.find({ createdBy: userId }).sort({ updatedAt: -1 }).limit(10)
+    Letter.countDocuments({ ...todayFilter, status: 'Completed' }),
+    Letter.countDocuments({ ...todayFilter, status: 'Draft' }),
+    Letter.countDocuments({ ...todayFilter, status: { $in: ['Pending', 'Overdue'] } }),
+    Letter.countDocuments({ ...todayFilter, status: { $in: ['Overdue', 'NoAction'] } }),
+    Letter.countDocuments({ assignedUsers: userId, createdAt: { $gte: todayStart, $lte: todayEnd } }),
+    Letter.find(todayFilter).sort({ updatedAt: -1 }).limit(10)
       .populate('createdBy', 'fullName username')
       .lean(),
   ]);
