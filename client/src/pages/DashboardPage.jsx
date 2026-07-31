@@ -118,7 +118,7 @@ function GroupedBarChart({
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, hasRole } = useAuth();
   const { t, lang } = useLanguage();
   const [period, setPeriod] = useState('daily');
   const [stats, setStats] = useState(null);
@@ -339,22 +339,24 @@ export default function DashboardPage() {
               <div className="chart-caption">{t('Draft vs completed counts by dashboard periods.', 'පුවරු කාලසීමා අනුව කෙටුම්පත් හා අවසන් ගණන.')}</div>
             </div>
 
-            <div className="card chart-card">
-              <div className="card-header">
-                <h3>{t('Staff Activity (8am-5pm)', 'කාර්ය මණ්ඩල ක්‍රියාකාරිත්වය (පෙ.ව. 8-ප.ව. 5)')}</h3>
+            {!hasRole('officer') && (
+              <div className="card chart-card">
+                <div className="card-header">
+                  <h3>{t('Staff Activity (8am-5pm)', 'කාර්ය මණ්ඩල ක්‍රියාකාරිත්වය (පෙ.ව. 8-ප.ව. 5)')}</h3>
+                </div>
+                <div className="svg-chart-container">
+                  <GroupedBarChart
+                    data={staffActivityChartData}
+                    leftKey="draft"
+                    rightKey="completed"
+                    leftLabel={t('Draft', 'කෙටුම්පත')}
+                    rightLabel={t('Completed', 'අවසන්')}
+                    emptyText={t('No staff activity data available', 'කාර්ය මණ්ඩල ක්‍රියාකාරිත්ව දත්ත නොමැත')}
+                  />
+                </div>
+                <div className="chart-caption">{t('Top 8 staff based on draft + completed letters.', 'කෙටුම්පත් + අවසන් ලිපි මත පදනම්ව ඉහළම කාර්ය මණ්ඩල 8.')}</div>
               </div>
-              <div className="svg-chart-container">
-                <GroupedBarChart
-                  data={staffActivityChartData}
-                  leftKey="draft"
-                  rightKey="completed"
-                  leftLabel={t('Draft', 'කෙටුම්පත')}
-                  rightLabel={t('Completed', 'අවසන්')}
-                  emptyText={t('No staff activity data available', 'කාර්ය මණ්ඩල ක්‍රියාකාරිත්ව දත්ත නොමැත')}
-                />
-              </div>
-              <div className="chart-caption">{t('Top 8 staff based on draft + completed letters.', 'කෙටුම්පත් + අවසන් ලිපි මත පදනම්ව ඉහළම කාර්ය මණ්ඩල 8.')}</div>
-            </div>
+            )}
           </div>
 
           {/* {summary && (

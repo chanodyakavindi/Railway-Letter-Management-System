@@ -12,7 +12,7 @@ const {
   computeReminderStatus,
 } = require('../utils/letterHelpers');
 const { buildNotificationPayload } = require('../utils/notifications');
-const { canViewLetter, canEditLetter, buildLetterFilter } = require('../middleware/rbac');
+const { canViewLetter, canEditLetter, canUpdateLetterStatus, buildLetterFilter } = require('../middleware/rbac');
 
 function parseLetterBody(body) {
   const data = { ...body };
@@ -231,7 +231,6 @@ exports.updateStatus = async (req, res, next) => {
 
     const { status } = req.body;
     const isSecretary = req.user.role === 'secretary';
-    const isOfficer = req.user.role === 'officer';
 
     if (isSecretary) {
       if (!canViewLetter(req.user, letter)) {
@@ -240,7 +239,7 @@ exports.updateStatus = async (req, res, next) => {
       if (status !== 'Completed' && status !== 'Pending') {
         return res.status(403).json({ message: 'Secretary can only mark response status' });
       }
-    } else if (!isOfficer || !canEditLetter(req.user, letter)) {
+    } else if (!canUpdateLetterStatus(req.user, letter, status)) {
       return res.status(403).json({ message: 'Cannot update status' });
     }
 

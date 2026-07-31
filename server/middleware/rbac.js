@@ -22,6 +22,20 @@ function canEditLetter(user, letter) {
   return false;
 }
 
+function canUpdateLetterStatus(user, letter, status) {
+  if (!letter || !canViewLetter(user, letter)) return false;
+
+  if (user.role === 'secretary') {
+    return status === 'Completed' || status === 'Pending';
+  }
+
+  if (user.role === 'officer' || user.role === 'head' || user.role === 'admin') {
+    return true;
+  }
+
+  return false;
+}
+
 function buildLetterFilter(user, query = {}) {
   const filter = { ...query };
 
@@ -34,6 +48,10 @@ function buildLetterFilter(user, query = {}) {
     ];
   }
 
+  if (user.role === 'officer') {
+    filter.createdBy = user._id;
+  }
+
   return filter;
 }
 
@@ -41,5 +59,6 @@ module.exports = {
   letterMatchesSecretaryCategory,
   canViewLetter,
   canEditLetter,
+  canUpdateLetterStatus,
   buildLetterFilter,
 };
